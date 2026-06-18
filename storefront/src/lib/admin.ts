@@ -161,28 +161,35 @@ export async function getUniqueUserIds(): Promise<string[]> {
   return unique;
 }
 
-// ── Analytics ─────────────────────────────────────────────────
+// ── Analytics (runs in-database via RPC) ──────────────────────
 export async function getAnalytics(): Promise<Analytics> {
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('*');
-  const { data: products } = await supabase
-    .from('products')
-    .select('*');
-  const { data: orderItems } = await supabase
-    .from('order_items')
-    .select('*');
+  const { data, error } = await supabase.rpc('get_admin_analytics');
 
-  const allOrders = (orders ?? []) as Order[];
-  const allProducts = (products ?? []) as Product[];
-  const allItems = (orderItems ?? []) as { product_id: string; quantity: number }[];
+  if (error) {
+    console.error('[admin] RPC error, falling back to JS aggregation:', error.message);
+    return getAnalyticsFallback();
+  }
+
+  return data as Analytics;
+}
+
+/** Fallback JS-side aggregation if RPC is unavailable */
+async function getAnalyticsFallback(): Promise<Analytics> {
+  const [orders, products, orderItems] = await Promise.all([
+    supabase.from('orders').select('total, status, created_at, user_id'),
+    supabase.from('products').select('id, name, emoji, price, slug, description, long_desc, compare_price, category, stock, rating, review_count, tag, featured, images, metadata, created_at'),
+    supabase.from('order_items').select('product_id, quantity'),
+  ]);
+
+  const allOrders = (orders.data ?? []) as Order[];
+  const allProducts = (products.data ?? []) as Product[];
+  const allItems = (orderItems.data ?? []) as { product_id: string; quantity: number }[];
 
   const totalOrders = allOrders.length;
   const totalRevenue = allOrders.reduce((s, o) => s + o.total, 0);
   const totalUsers = [...new Set(allOrders.map((o) => o.user_id))].length;
-  const averageOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+  const avg = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
-  // Revenue by day (last 14 days)
   const dayMap: Record<string, number> = {};
   for (const o of allOrders) {
     const day = o.created_at?.split('T')[0];
@@ -193,34 +200,16 @@ export async function getAnalytics(): Promise<Analytics> {
     .slice(-14)
     .map(([date, revenue]) => ({ date, revenue }));
 
-  // Orders by status
   const statusMap: Record<string, number> = {};
-  for (const o of allOrders) {
-    statusMap[o.status] = (statusMap[o.status] ?? 0) + 1;
-  }
+  for (const o of allOrders) statusMap[o.status] = (statusMap[o.status] ?? 0) + 1;
   const ordersByStatus = Object.entries(statusMap).map(([status, count]) => ({ status, count }));
 
-  // Top products
   const soldMap: Record<string, number> = {};
-  for (const item of allItems) {
-    soldMap[item.product_id] = (soldMap[item.product_id] ?? 0) + item.quantity;
-  }
+  for (const item of allItems) soldMap[item.product_id] = (soldMap[item.product_id] ?? 0) + item.quantity;
   const topProducts = allProducts
-    .map((p) => ({
-      ...p,
-      total_sold: soldMap[p.id] ?? 0,
-    }))
+    .map((p) => ({ ...p, total_sold: soldMap[p.id] ?? 0 }))
     .sort((a, b) => b.total_sold - a.total_sold)
     .slice(0, 10);
 
-  return {
-    totalRevenue,
-    totalOrders,
-    totalProducts: allProducts.length,
-    totalUsers,
-    averageOrderValue,
-    revenueByDay,
-    ordersByStatus,
-    topProducts,
-  };
+  return { totalRevenue, totalOrders, totalProducts: allProducts.length, totalUsers, averageOrderValue: avg, revenueByDay, ordersByStatus, topProducts };
 }

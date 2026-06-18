@@ -1,38 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  TrendingUp,
-  DollarSign,
-  ShoppingBag,
-  Package,
-  Users,
-  BarChart3,
-  Award,
-} from "lucide-react";
+import { TrendingUp, DollarSign, ShoppingBag, Package, Users, Award } from "lucide-react";
 import { formatPrice } from "@/lib/types";
 import type { Analytics } from "@/lib/admin";
 
+const kpis = [
+  { label: "Total Revenue", key: "totalRevenue" as const, icon: DollarSign, color: "text-green-400", bg: "bg-green-600/20", fmt: (v: number) => formatPrice(v) },
+  { label: "Orders", key: "totalOrders" as const, icon: ShoppingBag, color: "text-blue-400", bg: "bg-blue-600/20", fmt: (v: number) => v.toLocaleString() },
+  { label: "Avg Order Value", key: "averageOrderValue" as const, icon: TrendingUp, color: "text-purple-400", bg: "bg-purple-600/20", fmt: (v: number) => formatPrice(v) },
+  { label: "Customers", key: "totalUsers" as const, icon: Users, color: "text-orange-400", bg: "bg-orange-600/20", fmt: (v: number) => v.toLocaleString() },
+];
+
 export default function AdminAnalytics() {
-  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [a, setA] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/admin/analytics")
       .then((r) => r.json())
-      .then((d) => setAnalytics(d.analytics))
+      .then((d) => setA(d.analytics))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  const a = analytics!;
+  if (!a) return null;
 
   return (
     <div className="space-y-6">
@@ -41,132 +40,54 @@ export default function AdminAnalytics() {
         <p className="text-sm text-gray-400 mt-1">Detailed store performance</p>
       </div>
 
-      {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Total Revenue", value: formatPrice(a.totalRevenue), icon: DollarSign, color: "bg-green-600/20 text-green-400" },
-          { label: "Total Orders", value: a.totalOrders.toLocaleString(), icon: ShoppingBag, color: "bg-blue-600/20 text-blue-400" },
-          { label: "Avg Order Value", value: formatPrice(a.averageOrderValue), icon: TrendingUp, color: "bg-purple-600/20 text-purple-400" },
-          { label: "Total Customers", value: a.totalUsers.toLocaleString(), icon: Users, color: "bg-orange-600/20 text-orange-400" },
-        ].map((kpi) => (
-          <div key={kpi.label} className="rounded-xl border border-white/5 bg-[#111118] p-4">
+        {kpis.map((k) => (
+          <div key={k.key} className="rounded-xl border border-white/5 bg-[#111118] p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className={`p-2 rounded-lg ${kpi.color}`}>
-                <kpi.icon className="w-4 h-4" />
-              </div>
-              <p className="text-xs text-gray-400">{kpi.label}</p>
+              <div className={`p-2 rounded-lg ${k.bg} ${k.color}`}><k.icon className="w-4 h-4" /></div>
+              <p className="text-xs text-gray-400">{k.label}</p>
             </div>
-            <p className="text-xl font-bold text-white">{kpi.value}</p>
+            <p className="text-xl font-bold text-white">{k.fmt(a[k.key])}</p>
           </div>
         ))}
       </div>
 
-      {/* Revenue Chart */}
-      <div className="rounded-xl border border-white/5 bg-[#111118] p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-4 h-4 text-gray-400" />
-          <h2 className="text-sm font-medium text-gray-400">Revenue Trend (Last 14 Days)</h2>
-        </div>
-        {a.revenueByDay.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No revenue data yet</p>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-end gap-1.5 h-48">
-              {a.revenueByDay.map((d) => {
-                const max = Math.max(...a.revenueByDay.map((x) => x.revenue), 1);
-                const height = (d.revenue / max) * 100;
-                return (
-                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1.5 group">
-                    <span className="text-[10px] text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                      ₹{(d.revenue / 100).toFixed(0)}
-                    </span>
-                    <div
-                      className="w-full rounded-t bg-gradient-to-t from-orange-600/40 to-orange-500/60 hover:to-orange-400 transition-all cursor-pointer"
-                      style={{ height: `${Math.max(height, 4)}%` }}
-                    />
-                    <span className="text-[10px] text-gray-500">{d.date.slice(5)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Orders by Status */}
+        <div className="rounded-xl border border-white/5 bg-[#111118] p-5">
+          <h2 className="text-sm font-medium text-gray-400 mb-4">Revenue (Last 14 Days)</h2>
+          {a.revenueByDay.length === 0 ? (
+            <div className="text-center py-12 text-gray-500"><TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">No revenue data yet</p></div>
+          ) : (
+            <RevenueChart data={a.revenueByDay} />
+          )}
+        </div>
+
         <div className="rounded-xl border border-white/5 bg-[#111118] p-5">
           <h2 className="text-sm font-medium text-gray-400 mb-4">Orders by Status</h2>
           {a.ordersByStatus.length === 0 ? (
             <p className="text-gray-500 text-sm">No orders yet</p>
           ) : (
-            <div className="space-y-4">
-              {a.ordersByStatus.map((s) => {
-                const total = a.ordersByStatus.reduce((sum, x) => sum + x.count, 0);
-                const pct = total > 0 ? Math.round((s.count / total) * 100) : 0;
-                return (
-                  <div key={s.status} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-300 capitalize flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${
-                          s.status === "delivered" ? "bg-green-500" :
-                          s.status === "cancelled" ? "bg-red-500" :
-                          s.status === "paid" ? "bg-green-400" :
-                          s.status === "processing" ? "bg-blue-500" :
-                          s.status === "shipped" ? "bg-purple-500" :
-                          "bg-yellow-500"
-                        }`} />
-                        {s.status}
-                      </span>
-                      <span className="text-gray-400">{s.count} ({pct}%)</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-orange-600/60 transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Top Products */}
-        <div className="rounded-xl border border-white/5 bg-[#111118] p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Award className="w-4 h-4 text-gray-400" />
-            <h2 className="text-sm font-medium text-gray-400">Top Selling Products</h2>
-          </div>
-          {a.topProducts.length === 0 ? (
-            <p className="text-gray-500 text-sm">No products sold yet</p>
-          ) : (
-            <div className="space-y-2">
-              {a.topProducts.map((p, i) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xs text-gray-500 w-5 font-mono">{i + 1}</span>
-                    <span className="text-sm text-white truncate">{p.emoji} {p.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="text-xs text-gray-400">{p.total_sold} sold</span>
-                    <span className="text-xs text-gray-500">{formatPrice(p.price)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <StatusChart data={a.ordersByStatus} />
           )}
         </div>
       </div>
 
-      {/* Summary */}
+      {a.topProducts.length > 0 && (
+        <div className="rounded-xl border border-white/5 bg-[#111118] p-5">
+          <div className="flex items-center gap-2 mb-4"><Award className="w-4 h-4 text-gray-400" /><h2 className="text-sm font-medium text-gray-400">Top Selling Products</h2></div>
+          <div className="space-y-1">
+            {a.topProducts.map((p, i) => (
+              <div key={p.id} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors text-sm">
+                <span className="text-gray-500 w-5 text-xs font-mono">{i + 1}</span>
+                <span className="flex-1 text-white truncate">{p.emoji} {p.name}</span>
+                <span className="text-gray-400 mr-4">{p.total_sold} sold</span>
+                <span className="text-gray-500">{formatPrice(p.price)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl border border-white/5 bg-[#111118] p-5">
         <h2 className="text-sm font-medium text-gray-400 mb-4">Summary</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
@@ -184,6 +105,43 @@ export default function AdminAnalytics() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function RevenueChart({ data }: { data: { date: string; revenue: number }[] }) {
+  const max = Math.max(...data.map((d) => d.revenue)) || 1;
+  return (
+    <div className="flex items-end gap-1.5 h-48">
+      {data.map((d) => (
+        <div key={d.date} className="flex-1 flex flex-col items-center gap-1.5 group">
+          <span className="text-[10px] text-gray-500 opacity-0 group-hover:opacity-100">₹{(d.revenue / 100).toFixed(0)}</span>
+          <div className="w-full rounded-t bg-gradient-to-t from-orange-600/40 to-orange-500/60" style={{ height: `${Math.max((d.revenue / max) * 100, 4)}%` }} />
+          <span className="text-[10px] text-gray-500">{d.date.slice(5)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StatusChart({ data }: { data: { status: string; count: number }[] }) {
+  const total = data.reduce((s, x) => s + x.count, 0);
+  const colors: Record<string, string> = { delivered: "bg-green-500", cancelled: "bg-red-500", paid: "bg-green-400", processing: "bg-blue-500", shipped: "bg-purple-500", pending: "bg-yellow-500" };
+  return (
+    <div className="space-y-4">
+      {data.map((s) => (
+        <div key={s.status}>
+          <div className="flex items-center justify-between text-sm mb-1.5">
+            <span className="text-gray-300 capitalize flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${colors[s.status] ?? "bg-gray-500"}`} />{s.status}
+            </span>
+            <span className="text-gray-400">{s.count} ({total > 0 ? Math.round((s.count / total) * 100) : 0}%)</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+            <div className="h-full rounded-full bg-orange-600/60" style={{ width: `${(s.count / total) * 100}%` }} />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
