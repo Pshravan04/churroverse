@@ -92,27 +92,35 @@ ALTER TABLE public.orders      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
 -- Products: anyone can read
+DROP POLICY IF EXISTS "products_public_read" ON public.products;
 CREATE POLICY "products_public_read" ON public.products
   FOR SELECT USING (true);
 
 -- Cart: users own their rows (anon key used with user_id string)
+DROP POLICY IF EXISTS "cart_select" ON public.cart_items;
 CREATE POLICY "cart_select" ON public.cart_items
   FOR SELECT USING (true);
+DROP POLICY IF EXISTS "cart_insert" ON public.cart_items;
 CREATE POLICY "cart_insert" ON public.cart_items
   FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "cart_update" ON public.cart_items;
 CREATE POLICY "cart_update" ON public.cart_items
   FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "cart_delete" ON public.cart_items;
 CREATE POLICY "cart_delete" ON public.cart_items
   FOR DELETE USING (true);
 
 -- Wishlists: open via anon key (secured by user_id in app logic)
+DROP POLICY IF EXISTS "wishlist_all" ON public.wishlists;
 CREATE POLICY "wishlist_all" ON public.wishlists
   FOR ALL USING (true);
 
 -- Orders: open via anon key (secured by user_id in app logic)
+DROP POLICY IF EXISTS "orders_all" ON public.orders;
 CREATE POLICY "orders_all" ON public.orders
   FOR ALL USING (true);
 
+DROP POLICY IF EXISTS "order_items_all" ON public.order_items;
 CREATE POLICY "order_items_all" ON public.order_items
   FOR ALL USING (true);
 

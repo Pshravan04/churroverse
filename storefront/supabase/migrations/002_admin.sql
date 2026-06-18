@@ -38,5 +38,7 @@ ALTER TABLE public.discount_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rewards         ENABLE ROW LEVEL SECURITY;
 
 -- Admin-level access via anon key (secured by app logic)
+DROP POLICY IF EXISTS "discount_codes_all" ON public.discount_codes;
 CREATE POLICY "discount_codes_all" ON public.discount_codes FOR ALL USING (true);
+DROP POLICY IF EXISTS "rewards_all" ON public.rewards;
 CREATE POLICY "rewards_all"        ON public.rewards         FOR ALL USING (true);
