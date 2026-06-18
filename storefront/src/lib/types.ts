@@ -110,6 +110,73 @@ export function generateOrderNumber(): string {
   return `CV-${year}-${rand}`;
 }
 
+export interface Address {
+  id: string;
+  user_id: string;
+  full_name: string;
+  phone: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface Review {
+  id: string;
+  product_id: string;
+  user_id: string;
+  rating: number;
+  title: string;
+  text: string;
+  image_url: string | null;
+  created_at: string;
+}
+
+export interface TrackingEvent {
+  id: string;
+  order_id: string;
+  status: string;
+  note: string;
+  created_at: string;
+}
+
+export interface RewardTransaction {
+  id: string;
+  user_id: string;
+  points: number;
+  reason: 'signup' | 'purchase' | 'review' | 'referral' | 'redeem';
+  reference_id: string | null;
+  created_at: string;
+}
+
+export const TIER_THRESHOLDS = [
+  { name: 'Explorer', min: 0, color: 'text-gray-400' },
+  { name: 'Captain', min: 50000, color: 'text-blue-400' },
+  { name: 'Commander', min: 150000, color: 'text-purple-400' },
+  { name: 'Galaxy Master', min: 500000, color: 'text-yellow-400' },
+  { name: 'Churro Emperor', min: 10000000, color: 'text-orange-400' },
+] as const;
+
+export function getTier(totalSpentPaise: number): typeof TIER_THRESHOLDS[number] {
+  let tier: typeof TIER_THRESHOLDS[number] = TIER_THRESHOLDS[0];
+  for (const t of TIER_THRESHOLDS) {
+    if (totalSpentPaise >= t.min) tier = t;
+  }
+  return tier;
+}
+
+export const TRACKING_STAGES = [
+  { status: 'pending', label: 'Mission Received', icon: '📡' },
+  { status: 'paid', label: 'Preparing Churros', icon: '👨‍🍳' },
+  { status: 'processing', label: 'Packed', icon: '📦' },
+  { status: 'shipped', label: 'Launched', icon: '🚀' },
+  { status: 'delivered', label: 'Delivered', icon: '✅' },
+] as const;
+
 export type ProductCategory =
   | 'all'
   | 'classic'

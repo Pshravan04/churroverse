@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import type { CartItem, Order } from '@/lib/types';
+import { addTrackingEvent } from '@/lib/tracking';
+import { awardPoints, updateSpent, getReward } from '@/lib/rewards';
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,6 +57,13 @@ export async function POST(req: NextRequest) {
       console.error('[create-supabase-order] Items insert error:', itemsError);
       // Don't fail — order already created
     }
+
+    // Tracking + rewards (fire-and-forget)
+    addTrackingEvent({ order_id: order.id, status: 'pending', note: 'Order placed' }).catch(() => {});
+    updateSpent(orderData.user_id, orderData.total ?? 0).catch(() => {});
+    getReward(orderData.user_id).then((r) => {
+      if (!r) awardPoints(orderData.user_id!, 'signup', 100).catch(() => {});
+    }).catch(() => {});
 
     return NextResponse.json({ order });
   } catch (err: unknown) {

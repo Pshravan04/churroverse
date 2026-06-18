@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, ShoppingBag, Zap, Loader2, Check, Shield, Truck, CreditCard } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingBag, Zap, Loader2, Check, Shield, Truck, CreditCard, MapPin } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useCartStore } from "@/store/useCartStore";
 import { formatPrice, generateOrderNumber } from "@/lib/types";
-import type { ShippingAddress, Order } from "@/lib/types";
+import type { ShippingAddress, Order, Address } from "@/lib/types";
 
 declare global {
   interface Window {
@@ -338,6 +338,8 @@ export default function CheckoutPage() {
                   Galactic Coordinates
                 </h2>
 
+                <SavedAddresses userId={userId!} onSelect={(a) => setShipping({ full_name: a.full_name, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, state: a.state, pincode: a.pincode, country: a.country })} />
+
                 {error && (
                   <div className="bg-red-900/30 border border-red-500/30 rounded-xl p-4 mb-6 text-red-400 text-sm">
                     {error}
@@ -460,6 +462,49 @@ export default function CheckoutPage() {
             </motion.div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SavedAddresses({ userId, onSelect }: { userId: string; onSelect: (a: Address) => void }) {
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (open && userId) {
+      fetch(`/api/addresses?userId=${userId}`)
+        .then((r) => r.json())
+        .then((d) => setAddresses(d.addresses ?? []));
+    }
+  }, [open, userId]);
+
+  if (addresses.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 text-sm text-orange-400 hover:text-orange-300 transition-colors mb-3"
+      >
+        <MapPin className="w-4 h-4" /> {open ? "Hide" : "Use"} Saved Address
+      </button>
+      {open && (
+        <div className="space-y-2">
+          {addresses.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => { onSelect(a); setOpen(false); }}
+              className="w-full text-left rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition-colors"
+            >
+              <p className="text-white text-sm font-medium">{a.full_name}</p>
+              <p className="text-gray-400 text-xs">{a.line1}{a.line2 ? `, ${a.line2}` : ""}</p>
+              <p className="text-gray-500 text-xs">{a.city}, {a.state} — {a.pincode}</p>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

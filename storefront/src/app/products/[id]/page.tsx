@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Star, ShoppingBag, Heart, ArrowLeft, Zap, Shield, Truck } from "lucide-react";
+import { Star, ShoppingBag, Heart, ArrowLeft, Zap, Shield, Truck, StarHalf, MessageSquare } from "lucide-react";
 import { use } from "react";
+import { useUser } from "@clerk/nextjs";
 import AddToCartButton from "@/components/ui/AddToCartButton";
 import WishlistButton from "@/components/ui/WishlistButton";
-import type { Product } from "@/lib/types";
+import type { Product, Review } from "@/lib/types";
 import { formatPrice } from "@/lib/types";
 
 export default function ProductDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -198,6 +199,138 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
           </motion.div>
         </div>
       </div>
+
+      <ReviewSection productId={product.id} />
+    </div>
+  );
+}
+
+function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) {
+  const cls = size === "md" ? "w-5 h-5" : "w-3.5 h-3.5";
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star key={s} className={`${cls} ${s <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"}`} />
+      ))}
+    </div>
+  );
+}
+
+function ReviewSection({ productId }: { productId: string }) {
+  const { user } = useUser();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [myReview, setMyReview] = useState<Review | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ rating: 5, title: "", text: "" });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const u = user?.id ? `&userId=${user.id}` : "";
+    fetch(`/api/reviews?productId=${productId}${u}`)
+      .then((r) => r.json())
+      .then((d) => {
+        setReviews(d.reviews ?? []);
+        setMyReview(d.review ?? null);
+        setLoading(false);
+      });
+  }, [productId, user?.id]);
+
+  const submitReview = async () => {
+    if (!user?.id) return;
+    setSaving(true);
+    await fetch("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product_id: productId, user_id: user.id, ...form }),
+    });
+    setSaving(false);
+    setShowForm(false);
+    const r = await fetch(`/api/reviews?productId=${productId}&userId=${user.id}`).then((x) => x.json());
+    setReviews(r.reviews ?? []);
+    setMyReview(r.review ?? null);
+  };
+
+  const avg = reviews.length > 0 ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10 : 0;
+
+  return (
+    <div className="max-w-4xl mx-auto mt-16 px-4">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-orange-400" /> Reviews
+          </h2>
+          {reviews.length > 0 && (
+            <p className="text-sm text-gray-400 mt-1">{avg} avg · {reviews.length} review{reviews.length !== 1 ? "s" : ""}</p>
+          )}
+        </div>
+        {user && !myReview && !showForm && (
+          <button onClick={() => setShowForm(true)} className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
+            Write a Review
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>
+      ) : reviews.length === 0 ? (
+        <div className="text-center py-12 text-gray-500 border border-white/5 rounded-xl">
+          <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No reviews yet. Be the first!</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {reviews.map((r) => (
+            <div key={r.id} className="rounded-xl border border-white/5 bg-[#111118] p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <StarRating rating={r.rating} />
+                    {r.title && <span className="text-white text-sm font-medium">{r.title}</span>}
+                  </div>
+                  {r.text && <p className="text-gray-400 text-sm mt-2">{r.text}</p>}
+                  <p className="text-gray-600 text-xs mt-2">{new Date(r.created_at).toLocaleDateString("en-IN")}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60" onClick={() => setShowForm(false)} />
+          <div className="relative bg-[#111118] border border-white/10 rounded-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-white mb-4">Write a Review</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-gray-400 block mb-2">Rating</label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button key={s} onClick={() => setForm({ ...form, rating: s })}>
+                      <Star className={`w-6 h-6 ${s <= form.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Title (optional)</label>
+                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full bg-[#0a0820] border border-white/5 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-600/50" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Review</label>
+                <textarea value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} rows={4} className="w-full bg-[#0a0820] border border-white/5 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-600/50 resize-none" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/5">
+              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+              <button onClick={submitReview} disabled={saving} className="px-4 py-2 text-sm font-medium bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded-lg">
+                {saving ? "Submitting..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

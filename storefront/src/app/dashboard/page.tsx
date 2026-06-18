@@ -15,11 +15,12 @@ import { formatPrice } from "@/lib/types";
 import { useWishlistStore } from "@/store/useWishlistStore";
 
 const navItems = [
-  { key: "overview", label: "Profile Overview", icon: User },
-  { key: "orders", label: "Mission History", icon: Package },
-  { key: "wishlist", label: "Galactic Wishlist", icon: Heart },
-  { key: "addresses", label: "Coordinates", icon: MapPin },
-  { key: "settings", label: "Settings", icon: Settings },
+  { key: "overview", label: "Profile Overview", icon: User, href: "/dashboard" },
+  { key: "orders", label: "Mission History", icon: Package, href: "/dashboard" },
+  { key: "wishlist", label: "Galactic Wishlist", icon: Heart, href: "/dashboard" },
+  { key: "addresses", label: "Coordinates", icon: MapPin, href: "/dashboard/addresses" },
+  { key: "rewards", label: "Cosmic Rewards", icon: Star, href: "/dashboard/rewards" },
+  { key: "settings", label: "Settings", icon: Settings, href: "/dashboard" },
 ];
 
 const fadeUp = {
@@ -115,19 +116,34 @@ export default function DashboardPage() {
 
             {/* Nav */}
             <nav className="border border-white/10 rounded-2xl bg-white/5 overflow-hidden">
-              {navItems.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveSection(key)}
-                  className={`w-full flex items-center gap-3 px-5 py-4 text-sm font-medium transition-colors text-left border-b border-white/5 last:border-0 ${
-                    activeSection === key
-                      ? "bg-orange-600/20 text-orange-400 border-l-2 border-l-orange-500"
-                      : "text-gray-400 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </button>
+              {navItems.map(({ key, label, icon: Icon, href }) => (
+                href === "/dashboard" ? (
+                  <button
+                    key={key}
+                    onClick={() => setActiveSection(key)}
+                    className={`w-full flex items-center gap-3 px-5 py-4 text-sm font-medium transition-colors text-left border-b border-white/5 last:border-0 ${
+                      activeSection === key
+                        ? "bg-orange-600/20 text-orange-400 border-l-2 border-l-orange-500"
+                        : "text-gray-400 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </button>
+                ) : (
+                  <Link
+                    key={key}
+                    href={href}
+                    className={`w-full flex items-center gap-3 px-5 py-4 text-sm font-medium transition-colors text-left border-b border-white/5 ${
+                      false
+                        ? "bg-orange-600/20 text-orange-400 border-l-2 border-l-orange-500"
+                        : "text-gray-400 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </Link>
+                )
               ))}
               <button className="w-full flex items-center gap-3 px-5 py-4 text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors border-t border-white/10">
                 <LogOut className="w-4 h-4" />
@@ -205,8 +221,9 @@ export default function DashboardPage() {
                     const colors = statusColors[order.status] ?? statusColors.pending;
                     const itemCount = order.items?.length ?? 0;
                     return (
-                      <div
+                      <Link
                         key={order.id}
+                        href={`/dashboard/orders/${order.id}`}
                         className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 hover:bg-white/5 transition-colors"
                       >
                         <div>
@@ -224,7 +241,7 @@ export default function DashboardPage() {
                           </span>
                           <span className="text-white font-bold">{formatPrice(order.total)}</span>
                         </div>
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>
