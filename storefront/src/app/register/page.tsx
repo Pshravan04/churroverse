@@ -31,7 +31,9 @@ export default function RegisterPage() {
 
         <div className="relative z-10 flex flex-col items-center">
           <h1 className="text-3xl font-bold mb-2 text-center text-white">Create Commander Profile</h1>
-          <p className="text-gray-500 text-sm text-center mb-6">Join the Churroverse fleet and claim your first mission.</p>
+          <p className="text-gray-500 text-sm text-center mb-6">
+            Join the Churroverse fleet and claim your first mission.
+          </p>
           <SignUp
             appearance={{
               elements: {
