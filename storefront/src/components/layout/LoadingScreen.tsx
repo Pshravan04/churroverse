@@ -9,14 +9,18 @@ function detRandom(seed: number, i: number): number {
   return x - Math.floor(x);
 }
 
+function fix(n: number, d = 4): number {
+  return Number(n.toFixed(d));
+}
+
 function makeParticles(count: number) {
   const seed = 42;
   return Array.from({ length: count }, (_, i) => ({
-    left: `${detRandom(seed, i * 3) * 100}%`,
-    top: `${detRandom(seed, i * 3 + 1) * 100}%`,
-    opacity: detRandom(seed, i * 3 + 2) * 0.7 + 0.2,
-    duration: detRandom(seed, i * 3 + 3) * 2 + 1,
-    delay: detRandom(seed, i * 3 + 4) * 3,
+    left: `${fix(detRandom(seed, i * 3) * 100)}%`,
+    top: `${fix(detRandom(seed, i * 3 + 1) * 100)}%`,
+    opacity: fix(detRandom(seed, i * 3 + 2) * 0.7 + 0.2),
+    duration: fix(detRandom(seed, i * 3 + 3) * 2 + 1, 2),
+    delay: fix(detRandom(seed, i * 3 + 4) * 3, 2),
   }));
 }
 

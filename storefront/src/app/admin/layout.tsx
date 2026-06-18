@@ -33,7 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const isAdmin =
     user?.publicMetadata?.role === "admin" ||
-    user?.emailAddresses?.some((e) => e.emailAddress === "admin@churroverse.com");
+    user?.emailAddresses?.some((e) => e.emailAddress === "admin@churroverse.com" || e.emailAddress === "shravanphutanr@gmail.com");
 
   if (!isLoaded) {
     return (
