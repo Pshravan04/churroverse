@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Star, ShoppingBag, Heart, ArrowLeft, Zap, Shield, Truck, StarHalf, MessageSquare } from "lucide-react";
+import { Star, ShoppingBag, Heart, ArrowLeft, Zap, Shield, Truck, StarHalf, MessageSquare, X } from "lucide-react";
 import { use } from "react";
 import { useUser } from "@clerk/nextjs";
 import AddToCartButton from "@/components/ui/AddToCartButton";
@@ -272,63 +272,124 @@ function ReviewSection({ productId }: { productId: string }) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-8"><div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>
-      ) : reviews.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 border border-white/5 rounded-xl">
-          <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No reviews yet. Be the first!</p>
+        <div className="flex justify-center py-8">
+          <div className="w-6 h-6 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
         </div>
+      ) : reviews.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-16 text-gray-500 rounded-xl border border-white/5 bg-[#0a0a12]/50"
+        >
+          <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-medium">No reviews yet. Be the first!</p>
+        </motion.div>
       ) : (
-        <div className="space-y-3">
+        <motion.div
+          className="space-y-3"
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+        >
           {reviews.map((r) => (
-            <div key={r.id} className="rounded-xl border border-white/5 bg-[#111118] p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
+            <motion.div
+              key={r.id}
+              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+              className="rounded-xl border border-white/5 bg-[#0a0a12]/80 backdrop-blur-sm p-4 hover:border-white/10 transition-all hover:bg-[#0a0a12]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <StarRating rating={r.rating} />
-                    {r.title && <span className="text-white text-sm font-medium">{r.title}</span>}
+                    {r.title && <span className="text-white text-sm font-semibold truncate">{r.title}</span>}
                   </div>
-                  {r.text && <p className="text-gray-400 text-sm mt-2">{r.text}</p>}
-                  <p className="text-gray-600 text-xs mt-2">{new Date(r.created_at).toLocaleDateString("en-IN")}</p>
+                  {r.text && <p className="text-gray-400 text-sm mt-2 leading-relaxed">{r.text}</p>}
+                  <p className="text-gray-600 text-xs mt-3 font-mono">
+                    {new Date(r.created_at).toLocaleDateString("en-IN", {
+                      day: "numeric", month: "short", year: "numeric",
+                    })}
+                  </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setShowForm(false)} />
-          <div className="relative bg-[#111118] border border-white/10 rounded-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-bold text-white mb-4">Write a Review</h3>
-            <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowForm(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="relative bg-[#0a0a12] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6"
+          >
+            {/* Decorative gradient */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
+
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Write a Review</h3>
+              <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-white transition-colors p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
               <div>
-                <label className="text-xs text-gray-400 block mb-2">Rating</label>
-                <div className="flex gap-1">
+                <label className="text-xs text-gray-500 font-medium block mb-2 uppercase tracking-wider">Rating</label>
+                <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <button key={s} onClick={() => setForm({ ...form, rating: s })}>
-                      <Star className={`w-6 h-6 ${s <= form.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"}`} />
-                    </button>
+                    <motion.button
+                      key={s}
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setForm({ ...form, rating: s })}
+                    >
+                      <Star className={`w-7 h-7 transition-all ${s <= form.rating ? "text-yellow-400 fill-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.3)]" : "text-gray-600 hover:text-gray-500"}`} />
+                    </motion.button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Title (optional)</label>
-                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full bg-[#0a0820] border border-white/5 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-600/50" />
+                <label className="text-xs text-gray-500 font-medium block mb-1.5 uppercase tracking-wider">Title</label>
+                <input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Optional headline"
+                  className="w-full bg-[#0a0820]/80 border border-white/5 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-600/50 transition-colors"
+                />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Review</label>
-                <textarea value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} rows={4} className="w-full bg-[#0a0820] border border-white/5 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-600/50 resize-none" />
+                <label className="text-xs text-gray-500 font-medium block mb-1.5 uppercase tracking-wider">Review</label>
+                <textarea
+                  value={form.text}
+                  onChange={(e) => setForm({ ...form, text: e.target.value })}
+                  rows={4}
+                  placeholder="Share your experience..."
+                  className="w-full bg-[#0a0820]/80 border border-white/5 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-600/50 transition-colors resize-none"
+                />
               </div>
             </div>
+
             <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/5">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
-              <button onClick={submitReview} disabled={saving} className="px-4 py-2 text-sm font-medium bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded-lg">
-                {saving ? "Submitting..." : "Submit"}
+              <button onClick={() => setShowForm(false)} className="px-4 py-2.5 text-sm text-gray-500 hover:text-white transition-colors rounded-xl hover:bg-white/[0.04]">
+                Cancel
+              </button>
+              <button
+                onClick={submitReview}
+                disabled={saving}
+                className="px-5 py-2.5 text-sm font-bold bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-all shadow-[0_0_15px_rgba(234,88,12,0.3)] hover:shadow-[0_0_25px_rgba(234,88,12,0.5)]"
+              >
+                {saving ? "Submitting..." : "Submit Review"}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>
