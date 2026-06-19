@@ -23,7 +23,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 12 } },
+  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 100, damping: 12 } },
 };
 
 export default function AdminAnalytics() {
@@ -191,7 +191,7 @@ function RevenueChart({ data }: { data: { date: string; revenue: number }[] }) {
           className="flex-1 flex flex-col items-center gap-1.5 group cursor-pointer"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.02, type: "spring", stiffness: 80 }}
+          transition={{ delay: i * 0.02, type: "spring" as const, stiffness: 80 }}
         >
           <span className="text-[10px] text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
             ₹{(d.revenue / 100).toFixed(0)}

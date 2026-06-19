@@ -327,7 +327,7 @@ function ReviewSection({ productId }: { productId: string }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            transition={{ type: "spring" as const, stiffness: 200, damping: 20 }}
             className="relative bg-[#0a0a12] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6"
           >
             {/* Decorative gradient */}
