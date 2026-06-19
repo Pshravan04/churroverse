@@ -2,6 +2,8 @@
 
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { UserRound } from "lucide-react";
 
 export function HeaderAuth() {
   const { isLoaded, userId } = useAuth();
@@ -19,7 +21,15 @@ export function HeaderAuth() {
           </Button>
         </SignInButton>
       ) : (
-        <UserButton />
+        <UserButton>
+          <UserButton.MenuItems>
+            <UserButton.Link
+              label="Profile"
+              labelIcon={<UserRound className="w-4 h-4" />}
+              href="/profile"
+            />
+          </UserButton.MenuItems>
+        </UserButton>
       )}
     </>
   );
