@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -79,17 +79,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-[#020010] flex">
       {/* Mobile overlay */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      <div
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-200 ${
+          sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setSidebarOpen(false)}
+      />
 
       {/* Sidebar */}
       <aside
@@ -151,12 +146,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   `}
                 >
                   {isActive && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-orange-500 rounded-full"
-                    />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-orange-500 rounded-full shadow-[0_0_6px_rgba(234,88,12,0.6)]" />
                   )}
-                  <item.icon className="w-4.5 h-4.5 flex-shrink-0" />
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
                   {item.label}
                   {isActive && (
                     <ChevronRight className="w-3 h-3 ml-auto text-orange-500/50" />
@@ -173,7 +165,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             href="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-all duration-200 border border-transparent hover:border-white/5"
           >
-            <LogOut className="w-4.5 h-4.5 flex-shrink-0" />
+            <LogOut className="w-5 h-5 flex-shrink-0" />
             Back to Store
           </Link>
         </div>
