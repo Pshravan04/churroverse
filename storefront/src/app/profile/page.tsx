@@ -100,7 +100,6 @@ export default function ProfilePage() {
     { icon: Package, label: "Mission History", href: "/dashboard", desc: "View your orders" },
     { icon: Heart, label: "Galactic Wishlist", href: "/dashboard", desc: "Saved items" },
     { icon: MapPin, label: "Coordinates", href: "/dashboard/addresses", desc: "Saved addresses" },
-    { icon: Star, label: "Cosmic Rewards", href: "/dashboard/rewards", desc: "Rewards & tiers" },
   ];
 
   return (

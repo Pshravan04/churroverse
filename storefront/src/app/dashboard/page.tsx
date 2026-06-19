@@ -19,7 +19,6 @@ const navItems = [
   { key: "orders", label: "Mission History", icon: Package, href: "/dashboard" },
   { key: "wishlist", label: "Galactic Wishlist", icon: Heart, href: "/dashboard" },
   { key: "addresses", label: "Coordinates", icon: MapPin, href: "/dashboard/addresses" },
-  { key: "rewards", label: "Cosmic Rewards", icon: Star, href: "/dashboard/rewards" },
   { key: "settings", label: "Settings", icon: Settings, href: "/dashboard" },
 ];
 
