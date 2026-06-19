@@ -15,7 +15,7 @@ const fadeUp = {
 };
 
 const emptyForm = {
-  full_name: "", phone: "", line1: "", line2: "",
+  full_name: "", phone: "+91 ", line1: "", line2: "",
   city: "", state: "", pincode: "", country: "India", is_default: false,
 };
 

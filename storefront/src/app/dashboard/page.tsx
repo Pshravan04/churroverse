@@ -375,14 +375,14 @@ function WishlistSection({ userId }: { userId: string }) {
 }
 
 function SettingsSection({ user }: { user: ReturnType<typeof useUser>["user"] | null | undefined }) {
-  const [phoneInput, setPhoneInput] = useState("");
+  const [phoneInput, setPhoneInput] = useState("+91 ");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
   const phoneNumber = user?.phoneNumbers?.[0]?.phoneNumber ?? "";
 
   useEffect(() => {
-    setPhoneInput(phoneNumber);
+    setPhoneInput(phoneNumber || "+91 ");
   }, [phoneNumber]);
 
   const updatePhone = async () => {

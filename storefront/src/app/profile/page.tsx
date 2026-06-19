@@ -24,7 +24,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
-  const [phoneInput, setPhoneInput] = useState("");
+  const [phoneInput, setPhoneInput] = useState("+91 ");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -40,7 +40,7 @@ export default function ProfilePage() {
   }, [userId]);
 
   useEffect(() => {
-    setPhoneInput(user?.phoneNumbers?.[0]?.phoneNumber ?? "");
+    setPhoneInput(user?.phoneNumbers?.[0]?.phoneNumber ?? "+91 ");
   }, [user]);
 
   async function fetchOrders(uId: string) {
