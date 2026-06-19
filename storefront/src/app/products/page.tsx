@@ -11,13 +11,12 @@ import type { Product, ProductCategory, SortOption } from "@/lib/types";
 import { formatPrice } from "@/lib/types";
 
 const CATEGORIES: { key: ProductCategory; label: string; emoji: string }[] = [
-  { key: "all", label: "All Capsules", emoji: "🌌" },
-  { key: "classic", label: "Classic", emoji: "🌀" },
-  { key: "chocolate", label: "Chocolate", emoji: "🍫" },
-  { key: "biscoff", label: "Biscoff", emoji: "⭐" },
-  { key: "nutella", label: "Nutella", emoji: "🌌" },
-  { key: "strawberry", label: "Strawberry", emoji: "🍓" },
-  { key: "special", label: "Special", emoji: "💎" },
+  { key: "all", label: "All Galaxies", emoji: "🌌" },
+  { key: "churro", label: "Churro Planet", emoji: "🌀" },
+  { key: "shake", label: "Nebula Drinks", emoji: "🥤" },
+  { key: "iced-tea", label: "Iced Tea Nebula", emoji: "🧊" },
+  { key: "waffle", label: "Waffle Planet", emoji: "🧇" },
+  { key: "munchies", label: "Munchies Planet", emoji: "🍟" },
 ];
 
 const SORT_OPTIONS: { key: SortOption; label: string }[] = [

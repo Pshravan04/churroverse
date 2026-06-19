@@ -179,11 +179,10 @@ export const TRACKING_STAGES = [
 
 export type ProductCategory =
   | 'all'
-  | 'classic'
-  | 'chocolate'
-  | 'biscoff'
-  | 'nutella'
-  | 'strawberry'
-  | 'special';
+  | 'churro'
+  | 'shake'
+  | 'iced-tea'
+  | 'waffle'
+  | 'munchies';
 
 export type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating';

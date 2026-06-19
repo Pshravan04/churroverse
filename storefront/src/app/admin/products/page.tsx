@@ -13,7 +13,7 @@ import type { Product } from "@/lib/types";
 import type { ProductCategory } from "@/lib/types";
 
 const categories: ProductCategory[] = [
-  "all", "classic", "chocolate", "biscoff", "nutella", "strawberry", "special",
+  "all", "churro", "shake", "iced-tea", "waffle", "munchies",
 ];
 
 interface ProductForm {
