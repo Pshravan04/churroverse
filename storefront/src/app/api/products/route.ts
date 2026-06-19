@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import type { Product } from '@/lib/types';
+import { createClient } from '@supabase/supabase-js';
 
 export async function GET(request: Request) {
   try {
@@ -9,6 +8,14 @@ export async function GET(request: Request) {
     const search = url.searchParams.get('search') ?? undefined;
     const sort = url.searchParams.get('sort') ?? 'featured';
 
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json({ error: 'Supabase env vars missing' }, { status: 500 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
     let query = supabase.from('products').select('*');
 
     if (category && category !== 'all') {
@@ -35,7 +42,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ products: (data ?? []) as Product[] });
+    return NextResponse.json({ products: data ?? [] });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message ?? 'Failed to fetch products' }, { status: 500 });
   }
