@@ -1,18 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getProducts } from '@/lib/products';
-import type { ProductCategory, SortOption } from '@/lib/types';
+import { NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl;
-  const category = (searchParams.get('category') ?? 'all') as ProductCategory;
-  const search   = searchParams.get('search') ?? undefined;
-  const sort     = (searchParams.get('sort') ?? 'featured') as SortOption;
-
+export async function GET(request: Request) {
   try {
-    const products = await getProducts({ category, search, sort });
+    const url = new URL(request.url);
+    const category = url.searchParams.get('category') ?? 'all';
+    const search = url.searchParams.get('search') ?? undefined;
+    const sort = url.searchParams.get('sort') ?? 'featured';
+
+    const { getProducts } = await import('@/lib/products');
+
+    const products = await getProducts({ category, search, sort } as any);
     return NextResponse.json({ products });
-  } catch (err) {
-    console.error('[API] GET /api/products error:', err);
-    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message ?? 'Failed to fetch products' }, { status: 500 });
   }
 }
