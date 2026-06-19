@@ -16,7 +16,8 @@ import { useWishlistStore } from "@/store/useWishlistStore";
 
 const navItems = [
   { key: "overview", label: "Profile Overview", icon: User, href: "/dashboard" },
-  { key: "orders", label: "Mission History", icon: Package, href: "/dashboard" },
+  { key: "tracking", label: "Track Orders", icon: Package, href: "/dashboard/tracking" },
+  { key: "orders", label: "Mission History", icon: Clock, href: "/dashboard" },
   { key: "wishlist", label: "Galactic Wishlist", icon: Heart, href: "/dashboard" },
   { key: "addresses", label: "Coordinates", icon: MapPin, href: "/dashboard/addresses" },
   { key: "settings", label: "Settings", icon: Settings, href: "/dashboard" },

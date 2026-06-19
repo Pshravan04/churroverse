@@ -97,7 +97,7 @@ export default function ProfilePage() {
   ];
 
   const quickLinks = [
-    { icon: Package, label: "Mission History", href: "/dashboard", desc: "View your orders" },
+    { icon: Package, label: "Track Orders", href: "/dashboard/tracking", desc: "Track all missions" },
     { icon: Heart, label: "Galactic Wishlist", href: "/dashboard", desc: "Saved items" },
     { icon: MapPin, label: "Coordinates", href: "/dashboard/addresses", desc: "Saved addresses" },
   ];
