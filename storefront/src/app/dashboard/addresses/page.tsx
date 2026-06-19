@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,6 +8,8 @@ import {
   Loader2, Phone, User, ChevronRight
 } from "lucide-react";
 import type { Address } from "@/lib/types";
+import AutocompleteInput from "@/components/ui/AutocompleteInput";
+import { searchCities, searchStates, cities } from "@/lib/india-places";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -27,6 +29,8 @@ export default function AddressesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [stateSuggestions, setStateSuggestions] = useState<string[]>([]);
 
   const load = async () => {
     if (!user?.id) return;
@@ -91,6 +95,35 @@ export default function AddressesPage() {
       body: JSON.stringify({ action: "set-default", userId: user!.id }),
     });
     await load();
+  };
+
+  // --- Autocomplete handlers ---
+  const handleCityChange = (val: string) => {
+    setForm({ ...form, city: val });
+    const filtered = searchCities(val)
+      .filter((c) => !form.state || c.state === form.state)
+      .map((c) => c.city);
+    setCitySuggestions(filtered);
+  };
+
+  const handleCitySelect = (val: string) => {
+    setForm({ ...form, city: val });
+    setCitySuggestions([]);
+    // Auto-fill state from the selected city
+    const match = cities.find((c) => c.city === val);
+    if (match && match.state !== form.state) {
+      setForm((prev) => ({ ...prev, city: val, state: match.state }));
+    }
+  };
+
+  const handleStateChange = (val: string) => {
+    setForm({ ...form, state: val });
+    setStateSuggestions(searchStates(val));
+  };
+
+  const handleStateSelect = (val: string) => {
+    setForm({ ...form, state: val });
+    setStateSuggestions([]);
   };
 
   return (
@@ -316,21 +349,25 @@ export default function AddressesPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-gray-400 block mb-1.5">City</label>
-                    <input
+                    <AutocompleteInput
                       value={form.city}
-                      onChange={(e) => setForm({ ...form, city: e.target.value })}
+                      onChange={handleCityChange}
+                      onSelect={handleCitySelect}
+                      suggestions={citySuggestions}
                       placeholder="City"
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-600/50 transition-colors"
+                      label="City"
+                      icon={<MapPin className="w-3 h-3" />}
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400 block mb-1.5">State</label>
-                    <input
+                    <AutocompleteInput
                       value={form.state}
-                      onChange={(e) => setForm({ ...form, state: e.target.value })}
+                      onChange={handleStateChange}
+                      onSelect={handleStateSelect}
+                      suggestions={stateSuggestions}
                       placeholder="State"
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-600/50 transition-colors"
+                      label="State"
+                      icon={<Globe className="w-3 h-3" />}
                     />
                   </div>
                 </div>
