@@ -74,7 +74,7 @@ function generateGrainPositions(half: 'left' | 'right', halfLen: number): Float3
   return pos;
 }
 
-function GrainPoints({ positions, texture }: { positions: Float32Array; texture: THREE.CanvasTexture }) {
+function GrainPoints({ positions, texture }: { positions: Float32Array; texture: THREE.Texture }) {
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
