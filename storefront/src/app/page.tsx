@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Star, Zap, Shield, ChevronDown, Rocket, ArrowRight,
-  Sparkles, Clock, Truck, Award, Heart, ShoppingCart, Plus, Minus, Flame, Cookie, Snowflake,
+  Sparkles, Clock, Truck, Award, Heart, ShoppingCart, Plus, Minus, Flame, Cookie, Snowflake, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/types";
@@ -82,148 +82,169 @@ const CARD_ACCENTS = [
   { glow: "rgba(34,197,94,0.35)",  ring: "border-emerald-500/30", tagBg: "bg-emerald-600",    gradFrom: "from-emerald-950/60",gradTo: "to-teal-950/40",  text: "text-emerald-400", btn: "from-emerald-600 to-teal-600" },
 ];
 
-function FeaturedAccordionItem({
-  product,
-  index,
-  isHovered,
-  onHover,
-}: {
-  product: Product;
-  index: number;
-  isHovered: boolean;
-  onHover: () => void;
-}) {
-  const accent = CARD_ACCENTS[index % CARD_ACCENTS.length];
-  const savings = product.compare_price ? product.compare_price - product.price : 0;
+function FeaturedCarousel({ products }: { products: Product[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const next = () => setActiveIndex((prev) => (prev + 1) % products.length);
+  const prev = () => setActiveIndex((prev) => (prev - 1 + products.length) % products.length);
+
+  const activeProduct = products[activeIndex];
+  const accent = CARD_ACCENTS[activeIndex % CARD_ACCENTS.length];
 
   return (
-    <motion.div
-      layout
-      onMouseEnter={onHover}
-      onClick={onHover}
-      className={`group relative rounded-[2rem] border ${accent.ring} overflow-hidden cursor-pointer flex flex-col lg:flex-row bg-white/[0.02] backdrop-blur-md transition-all duration-500`}
-      animate={{
-        flex: isHovered ? (typeof window !== "undefined" && window.innerWidth >= 1024 ? 3.5 : 2) : 1,
-      }}
-      transition={{ type: "spring", bounce: 0.15, duration: 0.8 }}
-    >
-      {/* Background glow & gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${accent.gradFrom} ${accent.gradTo} transition-opacity duration-700 ${isHovered ? "opacity-80" : "opacity-30"}`} />
-      
-      <motion.div
-        animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inset-0 m-auto w-64 h-64 lg:w-96 lg:h-96 rounded-full blur-[100px] pointer-events-none"
-        style={{ background: accent.glow }}
-      />
+    <div className="relative w-full flex flex-col items-center">
+      {/* 3D Visual Carousel Area */}
+      <div className="relative w-full h-[350px] lg:h-[450px] flex items-center justify-center overflow-hidden perspective-[1200px] mb-8">
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="w-[300px] h-[300px] lg:w-[450px] lg:h-[450px] rounded-full blur-[100px]"
+            style={{ background: accent.glow }}
+          />
+        </div>
 
-      {/* Visual Area */}
-      <div className="relative z-10 flex items-center justify-center p-6 lg:p-12 h-32 lg:h-full lg:w-48 shrink-0">
-        <motion.div
-          layout
-          animate={{
-            scale: isHovered ? 1.4 : 1,
-            rotate: isHovered ? [0, -5, 5, 0] : 0,
-            y: isHovered ? [0, -10, 0] : 0,
-          }}
-          transition={{
-            y: { repeat: Infinity, duration: 3, ease: "easeInOut" },
-            rotate: { repeat: Infinity, duration: 6, ease: "easeInOut" },
-          }}
-          className="relative drop-shadow-2xl select-none flex items-center justify-center w-full h-full"
-        >
-          {product.images && product.images.length > 0 ? (
-            <img 
-              src={product.images[0]} 
-              alt={product.name} 
-              className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]" 
-              style={{ maxHeight: '200px' }}
-            />
-          ) : (
-            <span className="text-[5rem] lg:text-[7rem]">{product.emoji}</span>
-          )}
-        </motion.div>
+        {products.map((p, i) => {
+          let offset = i - activeIndex;
+          if (offset < -1) offset += products.length;
+          if (offset > 1) offset -= products.length;
+
+          if (offset === 2 || offset === -2) {
+            return null;
+          }
+
+          const isActive = offset === 0;
+          const isLeft = offset === -1;
+          const isRight = offset === 1;
+
+          let x = 0;
+          let scale = 0.6;
+          let opacity = 0;
+          let zIndex = 30;
+          let blur = "blur(8px)";
+          let rotateY = 0;
+
+          if (isActive) {
+            x = 0;
+            scale = 1.3;
+            opacity = 1;
+            zIndex = 50;
+            blur = "blur(0px)";
+            rotateY = 0;
+          } else if (isLeft) {
+            x = typeof window !== "undefined" && window.innerWidth < 1024 ? -120 : -350;
+            scale = 0.8;
+            opacity = 0.4;
+            zIndex = 40;
+            blur = "blur(4px)";
+            rotateY = 20;
+          } else if (isRight) {
+            x = typeof window !== "undefined" && window.innerWidth < 1024 ? 120 : 350;
+            scale = 0.8;
+            opacity = 0.4;
+            zIndex = 40;
+            blur = "blur(4px)";
+            rotateY = -20;
+          }
+
+          return (
+            <motion.div
+              key={p.id}
+              initial={false}
+              animate={{
+                x,
+                scale,
+                opacity,
+                zIndex,
+                filter: blur,
+                rotateY,
+              }}
+              transition={{ type: "spring", bounce: 0.2, duration: 0.8 }}
+              className={`absolute top-0 bottom-0 m-auto flex items-center justify-center w-64 h-64 lg:w-96 lg:h-96 ${!isActive && "cursor-pointer"}`}
+              onClick={() => {
+                if (isLeft) prev();
+                if (isRight) next();
+              }}
+            >
+              {p.images && p.images.length > 0 ? (
+                <motion.img 
+                  animate={isActive ? { y: [0, -15, 0], rotate: [0, 5, -5, 0] } : {}}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  src={p.images[0]} 
+                  alt={p.name} 
+                  className="w-full h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]" 
+                />
+              ) : (
+                <span className="text-[7rem] lg:text-[10rem]">{p.emoji}</span>
+              )}
+            </motion.div>
+          );
+        })}
+
+        {/* Carousel Controls */}
+        <div className="absolute top-1/2 -translate-y-1/2 left-0 lg:left-12 z-50">
+          <button onClick={prev} className="p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all backdrop-blur-md">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="absolute top-1/2 -translate-y-1/2 right-0 lg:right-12 z-50">
+          <button onClick={next} className="p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all backdrop-blur-md">
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
-      {/* Content Area */}
-      <AnimatePresence mode="popLayout">
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="relative z-10 p-6 pt-0 lg:p-12 lg:pl-0 flex flex-col justify-center flex-1 min-w-[280px]"
-          >
-            {product.tag && (
-              <span className={`self-start ${accent.tagBg} text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg mb-3 lg:mb-4`}>
-                {product.tag}
-              </span>
-            )}
-            
-            <h3 className={`text-3xl lg:text-5xl font-black text-white leading-tight mb-2 lg:mb-3 group-hover:${accent.text} transition-colors`}>
-              {product.name}
-            </h3>
-            
-            <p className="text-gray-300 text-sm lg:text-base mb-4 lg:mb-6 max-w-md line-clamp-2 lg:line-clamp-3">
-              {product.description}
-            </p>
+      {/* Active Product Details */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeProduct.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center text-center max-w-2xl z-20"
+        >
+          {activeProduct.tag && (
+            <span className={`${accent.tagBg} text-white text-[10px] lg:text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-[0_0_15px_rgba(255,255,255,0.2)] mb-4`}>
+              {activeProduct.tag}
+            </span>
+          )}
+          
+          <h3 className={`text-4xl lg:text-6xl font-black text-white leading-tight mb-4 tracking-tight`}>
+            {activeProduct.name}
+          </h3>
+          
+          <p className="text-gray-300 text-base lg:text-lg mb-8 px-4">
+            {activeProduct.description}
+          </p>
 
-            <div className="flex items-center gap-3 mb-6 lg:mb-8">
-              <StarRating rating={product.rating} size="md" />
-              <span className={`font-bold ${accent.text}`}>{product.rating}</span>
-              <span className="text-gray-500 text-xs lg:text-sm">({product.review_count} reviews)</span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mt-auto gap-4">
-              <div className="flex flex-col">
-                {product.compare_price && (
-                  <span className="text-sm text-gray-500 line-through mb-1">
-                    {formatPrice(product.compare_price)}
-                  </span>
-                )}
-                <div className="flex items-baseline gap-2">
-                  <span className={`text-3xl lg:text-4xl font-black ${accent.text}`}>
-                    {formatPrice(product.price)}
-                  </span>
-                  {savings > 0 && (
-                    <span className="text-xs text-emerald-400 font-bold ml-2">
-                      Save {formatPrice(savings)}
-                    </span>
-                  )}
-                </div>
+          <div className="flex flex-col sm:flex-row items-center gap-6 lg:gap-8">
+            <div className="flex flex-col items-center sm:items-start">
+              {activeProduct.compare_price && (
+                <span className="text-sm text-gray-500 line-through mb-1">
+                  {formatPrice(activeProduct.compare_price)}
+                </span>
+              )}
+              <div className="flex items-baseline gap-2">
+                <span className={`text-4xl lg:text-5xl font-black ${accent.text}`}>
+                  {formatPrice(activeProduct.price)}
+                </span>
               </div>
-              
-              <Link href={`/products/${product.id}`} className="shrink-0 w-full sm:w-auto">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r ${accent.btn} text-white font-bold px-6 py-3 lg:px-8 lg:py-4 rounded-full shadow-lg transition-shadow hover:shadow-2xl hover:shadow-${accent.tagBg.replace("bg-", "")}/50`}
-                >
-                  <ShoppingCart className="w-5 h-5" /> Order Now
-                </motion.button>
-              </Link>
             </div>
-          </motion.div>
-        )}
+            
+            <Link href={`/products/${activeProduct.id}`}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`flex items-center justify-center gap-3 bg-gradient-to-r ${accent.btn} text-white font-black px-8 py-4 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all`}
+              >
+                <ShoppingCart className="w-5 h-5" /> Launch Mission
+              </motion.button>
+            </Link>
+          </div>
+        </motion.div>
       </AnimatePresence>
-
-      {/* Non-hovered state vertical title (Desktop) / Horizontal (Mobile) */}
-      <AnimatePresence>
-        {!isHovered && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute bottom-6 left-0 right-0 lg:bottom-auto lg:top-0 lg:left-0 lg:right-0 lg:h-full flex items-center justify-center pointer-events-none px-4 text-center"
-          >
-            <h3 className="text-sm lg:text-xl font-black uppercase tracking-widest lg:tracking-[0.2em] text-white/50 group-hover:text-white/80 transition-colors lg:origin-center lg:-rotate-90 whitespace-nowrap">
-              {product.name}
-            </h3>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
 
@@ -472,8 +493,6 @@ function HeroSection() {
 }
 
 function FeaturedSection({ products }: { products: Product[] }) {
-  const [hoveredIndex, setHoveredIndex] = useState<number>(0);
-
   if (!products.length) return null;
 
   return (
@@ -507,38 +526,9 @@ function FeaturedSection({ products }: { products: Product[] }) {
             </p>
           </motion.div>
 
-          {/* Accordion Gallery */}
-          <motion.div variants={fadeUp} className="flex flex-col lg:flex-row gap-4 h-[700px] lg:h-[550px]">
-            {products.slice(0, 4).map((p, i) => (
-              <FeaturedAccordionItem
-                key={p.id}
-                product={p}
-                index={i}
-                isHovered={hoveredIndex === i}
-                onHover={() => setHoveredIndex(i)}
-              />
-            ))}
-          </motion.div>
-
-          {/* CTA */}
-          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-16">
-            <Link href="/products">
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold px-8 py-4 rounded-full shadow-[0_0_30px_rgba(234,88,12,0.35)] hover:shadow-[0_0_50px_rgba(234,88,12,0.55)] transition-all"
-              >
-                <Sparkles className="w-4 h-4" /> View All Capsules
-              </motion.button>
-            </Link>
-            <Link href="/products?sort=rating">
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                className="flex items-center gap-2 border border-white/20 text-white font-bold px-8 py-4 rounded-full hover:bg-white/5 transition-all backdrop-blur-sm"
-              >
-                Top Rated <ArrowRight className="w-4 h-4" />
-              </motion.button>
-            </Link>
+          {/* 3D Carousel */}
+          <motion.div variants={fadeUp}>
+            <FeaturedCarousel products={products.slice(0, 4)} />
           </motion.div>
 
         </motion.div>
