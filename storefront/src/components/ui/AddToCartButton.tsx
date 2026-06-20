@@ -138,7 +138,7 @@ export default function AddToCartButton({
           : state === "loading"
           ? "Adding..."
           : state === "success"
-          ? "Added! 🚀"
+          ? "Added!"
           : "Add to Cart"}
       </motion.span>
       
@@ -160,7 +160,7 @@ export default function AddToCartButton({
               className="fixed z-[9999] text-4xl pointer-events-none drop-shadow-[0_0_20px_rgba(234,88,12,0.8)]"
               style={{ marginLeft: -16, marginTop: -16 }}
             >
-              🚀
+              <div className="w-3 h-3 bg-white rounded-full shadow-[0_0_20px_4px_rgba(234,88,12,0.8)]" />
             </motion.div>
           ))}
         </AnimatePresence>,

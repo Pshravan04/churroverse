@@ -45,17 +45,17 @@
 
 /* ─── Churroverse dark space theme ────────────────────── */
 :root {
-  --background: #020010;
+  --background: #030303;
   --foreground: #f8f8ff;
-  --card: #0a0820;
+  --card: #0a0a0a;
   --card-foreground: #f8f8ff;
-  --popover: #0a0820;
+  --popover: #0a0a0a;
   --popover-foreground: #f8f8ff;
   --primary: #ea580c;
   --primary-foreground: #ffffff;
-  --secondary: #1a1040;
+  --secondary: #1a1a1a;
   --secondary-foreground: #f8f8ff;
-  --muted: #0f0c30;
+  --muted: #111111;
   --muted-foreground: #9ca3af;
   --accent: #ea580c;
   --accent-foreground: #ffffff;
@@ -64,11 +64,11 @@
   --input: rgba(255, 255, 255, 0.08);
   --ring: #ea580c;
   --radius: 0.75rem;
-  --sidebar: #0a0820;
+  --sidebar: #0a0a0a;
   --sidebar-foreground: #f8f8ff;
   --sidebar-primary: #ea580c;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1040;
+  --sidebar-accent: #1a1a1a;
   --sidebar-accent-foreground: #f8f8ff;
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: #ea580c;
@@ -81,7 +81,7 @@
     box-sizing: border-box;
   }
   body {
-    background-color: #020010;
+    background-color: #030303;
     color: #f8f8ff;
     font-family: var(--font-sans);
     min-height: 100vh;
@@ -99,7 +99,7 @@
     width: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #020010;
+    background: #030303;
   }
   ::-webkit-scrollbar-thumb {
     background: rgba(234, 88, 12, 0.4);

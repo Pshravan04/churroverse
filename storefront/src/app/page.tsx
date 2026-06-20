@@ -27,11 +27,11 @@ const stagger = {
 
 // ── Category config (matches actual menu) ─────────────────────
 const CATEGORIES = [
-  { key: "churro", label: "Churro Planet", emoji: "🌀", image: "/churro-hero.png", desc: "Classic galactic churros — cinnamon-dusted, caramel-filled, every bite a supernova.", gradient: "from-orange-900/40 to-amber-900/20", glow: "rgba(234,88,12,0.3)" },
-  { key: "shake", label: "Nebula Drinks", emoji: "🥤", image: "/categories/shake.png", desc: "Thick, creamy milkshakes infused with cosmic flavors from across the universe.", gradient: "from-pink-900/40 to-purple-900/20", glow: "rgba(236,72,153,0.3)" },
-  { key: "iced-tea", label: "Iced Tea Nebula", emoji: "🧊", image: "/categories/iced-tea.png", desc: "Refreshing iced teas brewed from rare leaves found on distant moons.", gradient: "from-amber-900/40 to-yellow-900/20", glow: "rgba(245,158,11,0.3)" },
-  { key: "waffle", label: "Waffle Planet", emoji: "🧇", image: "/categories/waffle.png", desc: "Golden waffles with crispy constellations and sweet meteor showers.", gradient: "from-yellow-900/40 to-orange-900/20", glow: "rgba(251,191,36,0.3)" },
-  { key: "munchies", label: "Munchies Planet", emoji: "🍟", image: "/categories/munchies.png", desc: "Savory cosmic snacks — perfect co-pilots for your flavor expedition.", gradient: "from-red-900/40 to-orange-900/20", glow: "rgba(220,38,38,0.3)" },
+  { key: "churro", label: "Churro Planet", emoji: "", image: "/churro-hero.png", desc: "Classic galactic churros — cinnamon-dusted, caramel-filled, every bite a supernova.", gradient: "from-orange-900/40 to-amber-900/20", glow: "rgba(234,88,12,0.3)" },
+  { key: "shake", label: "Nebula Drinks", emoji: "", image: "/categories/shake.png", desc: "Thick, creamy milkshakes infused with cosmic flavors from across the universe.", gradient: "from-pink-900/40 to-purple-900/20", glow: "rgba(236,72,153,0.3)" },
+  { key: "iced-tea", label: "Iced Tea Nebula", emoji: "", image: "/categories/iced-tea.png", desc: "Refreshing iced teas brewed from rare leaves found on distant moons.", gradient: "from-amber-900/40 to-yellow-900/20", glow: "rgba(245,158,11,0.3)" },
+  { key: "waffle", label: "Waffle Planet", emoji: "", image: "/categories/waffle.png", desc: "Golden waffles with crispy constellations and sweet meteor showers.", gradient: "from-yellow-900/40 to-orange-900/20", glow: "rgba(251,191,36,0.3)" },
+  { key: "munchies", label: "Munchies Planet", emoji: "", image: "/categories/munchies.png", desc: "Savory cosmic snacks — perfect co-pilots for your flavor expedition.", gradient: "from-red-900/40 to-orange-900/20", glow: "rgba(220,38,38,0.3)" },
 ];
 
 const FEATURES = [
@@ -42,18 +42,18 @@ const FEATURES = [
 ];
 
 const MOCK_FEATURED: Product[] = [
-  { id: "m1", slug: "cosmic-churro", name: "Cosmic Churro Classic", description: "Cinnamon-dusted spirals, caramel-filled, lightly crispy.", long_desc: null, price: 24900, compare_price: null, category: "churro", emoji: "🌀", stock: 50, rating: 4.8, review_count: 312, tag: "Best Seller", featured: true, images: ["/products/classic.png"], metadata: {}, created_at: "" },
-  { id: "m2", slug: "dark-matter", name: "Dark Matter Chocolate", description: "Rich 70% dark chocolate ganache fused into every bite.", long_desc: null, price: 29900, compare_price: 34900, category: "churro", emoji: "🍫", stock: 40, rating: 4.9, review_count: 218, tag: "New Arrival", featured: true, images: ["/products/dark-matter.png"], metadata: {}, created_at: "" },
-  { id: "m3", slug: "stardust-biscoff", name: "Stardust Biscoff", description: "Belgian Biscoff cream swirled through crunchy dough.", long_desc: null, price: 27900, compare_price: null, category: "churro", emoji: "⭐", stock: 35, rating: 4.7, review_count: 156, tag: "Fan Favorite", featured: true, images: ["/products/biscoff.png"], metadata: {}, created_at: "" },
-  { id: "m8", slug: "supernova-matcha", name: "Supernova Matcha", description: "Japanese ceremonial matcha cream with white chocolate drizzle.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "🍵", stock: 20, rating: 4.9, review_count: 189, tag: "Limited", featured: true, images: ["/products/matcha.png"], metadata: {}, created_at: "" },
+  { id: "m1", slug: "cosmic-churro", name: "Cosmic Churro Classic", description: "Cinnamon-dusted spirals, caramel-filled, lightly crispy.", long_desc: null, price: 24900, compare_price: null, category: "churro", emoji: "", stock: 50, rating: 4.8, review_count: 312, tag: "Best Seller", featured: true, images: ["/products/classic.png"], metadata: {}, created_at: "" },
+  { id: "m2", slug: "dark-matter", name: "Dark Matter Chocolate", description: "Rich 70% dark chocolate ganache fused into every bite.", long_desc: null, price: 29900, compare_price: 34900, category: "churro", emoji: "", stock: 40, rating: 4.9, review_count: 218, tag: "New Arrival", featured: true, images: ["/products/dark-matter.png"], metadata: {}, created_at: "" },
+  { id: "m3", slug: "stardust-biscoff", name: "Stardust Biscoff", description: "Belgian Biscoff cream swirled through crunchy dough.", long_desc: null, price: 27900, compare_price: null, category: "churro", emoji: "", stock: 35, rating: 4.7, review_count: 156, tag: "Fan Favorite", featured: true, images: ["/products/biscoff.png"], metadata: {}, created_at: "" },
+  { id: "m8", slug: "supernova-matcha", name: "Supernova Matcha", description: "Japanese ceremonial matcha cream with white chocolate drizzle.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "", stock: 20, rating: 4.9, review_count: 189, tag: "Limited", featured: true, images: ["/products/matcha.png"], metadata: {}, created_at: "" },
 ];
 
 
 const MOCK_BESTSELLERS: Product[] = [
-  { id: "m4", slug: "nebula-nutella", name: "Nebula Nutella", description: "Hazelnut cocoa spread meets warm churro dough.", long_desc: null, price: 28900, compare_price: null, category: "churro", emoji: "🌌", stock: 30, rating: 4.9, review_count: 312, tag: null, featured: false, images: ["/products/nutella.png"], metadata: {}, created_at: "" },
-  { id: "m5", slug: "solar-strawberry", name: "Solar Strawberry", description: "Sun-ripened strawberries in a sweet glaze.", long_desc: null, price: 25900, compare_price: null, category: "churro", emoji: "🌟", stock: 45, rating: 4.8, review_count: 218, tag: null, featured: false, images: ["/products/strawberry.png"], metadata: {}, created_at: "" },
-  { id: "m6", slug: "orion-oreo", name: "Orion Oreo Blast", description: "Crushed Oreo cookies fused into every ridge.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "🪐", stock: 25, rating: 5.0, review_count: 156, tag: null, featured: false, images: ["/products/oreo.png"], metadata: {}, created_at: "" },
-  { id: "m7", slug: "galaxy-caramel", name: "Galaxy Caramel", description: "House-made caramel sauce, stretched and pulled to perfection.", long_desc: null, price: 26900, compare_price: null, category: "churro", emoji: "✨", stock: 60, rating: 4.7, review_count: 445, tag: null, featured: false, images: ["/products/caramel.png"], metadata: {}, created_at: "" },
+  { id: "m4", slug: "nebula-nutella", name: "Nebula Nutella", description: "Hazelnut cocoa spread meets warm churro dough.", long_desc: null, price: 28900, compare_price: null, category: "churro", emoji: "", stock: 30, rating: 4.9, review_count: 312, tag: null, featured: false, images: ["/products/nutella.png"], metadata: {}, created_at: "" },
+  { id: "m5", slug: "solar-strawberry", name: "Solar Strawberry", description: "Sun-ripened strawberries in a sweet glaze.", long_desc: null, price: 25900, compare_price: null, category: "churro", emoji: "", stock: 45, rating: 4.8, review_count: 218, tag: null, featured: false, images: ["/products/strawberry.png"], metadata: {}, created_at: "" },
+  { id: "m6", slug: "orion-oreo", name: "Orion Oreo Blast", description: "Crushed Oreo cookies fused into every ridge.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "", stock: 25, rating: 5.0, review_count: 156, tag: null, featured: false, images: ["/products/oreo.png"], metadata: {}, created_at: "" },
+  { id: "m7", slug: "galaxy-caramel", name: "Galaxy Caramel", description: "House-made caramel sauce, stretched and pulled to perfection.", long_desc: null, price: 26900, compare_price: null, category: "churro", emoji: "", stock: 60, rating: 4.7, review_count: 445, tag: null, featured: false, images: ["/products/caramel.png"], metadata: {}, created_at: "" },
 ];
 
 const MOCK_REVIEWS = [
@@ -97,8 +97,8 @@ function FeaturedCarousel({ products }: { products: Product[] }) {
       <div className="relative w-full h-[350px] lg:h-[450px] flex items-center justify-center overflow-hidden perspective-[1200px] mb-8">
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
           <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ opacity: [0.15, 0.3, 0.15] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             className="w-[300px] h-[300px] lg:w-[450px] lg:h-[450px] rounded-full blur-[100px]"
             style={{ background: accent.glow }}
           />
@@ -168,15 +168,15 @@ function FeaturedCarousel({ products }: { products: Product[] }) {
             >
               {p.images && p.images.length > 0 ? (
                 <motion.div
-                  animate={isActive ? { y: [0, -20, 0], rotate: [-2, 2, -2] } : {}}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  animate={isActive ? { y: [0, -4, 0] } : {}}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                   className="w-full h-full"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={p.images[0]} 
                     alt={p.name} 
-                    className={`w-full h-full object-contain filter ${isActive ? "drop-shadow-[0_40px_60px_rgba(0,0,0,0.9)]" : "drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"}`} 
+                    className={`w-full h-full object-contain filter ${isActive ? "drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]" : "drop-shadow-[0_10px_20px_rgba(0,0,0,0.4)]"}`} 
                   />
                 </motion.div>
               ) : (
@@ -382,27 +382,25 @@ function HeroSection() {
           >
             {/* Glow rings */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-72 h-72 rounded-full border border-orange-500/10 animate-pulse" />
-              <div className="absolute w-52 h-52 rounded-full border border-orange-400/15" />
-              <div className="absolute w-80 h-80 rounded-full bg-orange-600/8 blur-[60px]" />
+              <div className="absolute w-[400px] h-[400px] rounded-full bg-orange-600/5 blur-[80px]" />
             </div>
 
             {/* "Crispy & Warm Toasty" badge overlay like reference */}
             <div className="absolute left-0 bottom-[28%] z-20 flex flex-col gap-1">
-              <div className="bg-orange-500 text-white font-black text-base px-5 py-2 rounded-r-full tracking-wide shadow-[0_4px_20px_rgba(234,88,12,0.6)] uppercase">Crispy &amp;</div>
-              <div className="bg-gradient-to-r from-pink-600 to-red-600 text-white font-black text-base px-5 py-2 rounded-r-full tracking-wide shadow-[0_4px_20px_rgba(220,38,38,0.6)] uppercase">Warm Toasty</div>
+              <div className="bg-zinc-900/80 backdrop-blur-md border border-white/10 text-white font-medium text-xs px-5 py-2 rounded-r-full tracking-widest uppercase">Crispy &amp;</div>
+              <div className="bg-orange-500/90 backdrop-blur-md text-white font-bold text-sm px-5 py-2 rounded-r-full tracking-widest uppercase">Warm Toasty</div>
             </div>
 
             <motion.div
-              animate={{ y: [0, -14, 0], rotate: [-1, 1, -1] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               className="relative z-10"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/churro-hero.png"
                 alt="Cosmic Churro — Cinnamon-dusted, caramel-filled"
-                className="w-[320px] md:w-[400px] xl:w-[460px] object-contain drop-shadow-[0_20px_60px_rgba(234,88,12,0.4)]"
+                className="w-[320px] md:w-[400px] xl:w-[460px] object-contain drop-shadow-2xl"
               />
             </motion.div>
           </motion.div>

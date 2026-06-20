@@ -3,7 +3,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Preload } from "@react-three/drei";
 import StarField from "./StarField";
-import UFOFleet from "./UFOFleet";
 import { CosmicParticles } from "./CosmicParticles";
 
 export default function GlobalCanvas({ children }: { children?: React.ReactNode }) {
@@ -16,17 +15,16 @@ export default function GlobalCanvas({ children }: { children?: React.ReactNode 
         dpr={[1, 1.5]}
       >
         {/* Deep space background */}
-        <color attach="background" args={["#020010"]} />
+        <color attach="background" args={["#030303"]} />
         
         {/* Ambient + directional lights */}
-        <ambientLight intensity={0.3} />
-        <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffe8c0" />
-        <pointLight position={[-5, -5, -5]} intensity={0.5} color="#ff6b35" />
+        <ambientLight intensity={0.15} />
+        <directionalLight position={[10, 15, 10]} intensity={1.8} color="#ffffff" castShadow />
+        <pointLight position={[-10, -10, -5]} intensity={0.4} color="#a1b5d1" />
         
         {/* Scene elements */}
         <StarField count={3000} />
-        <CosmicParticles count={2000} />
-        <UFOFleet />
+        <CosmicParticles count={1500} />
         
         {children}
         

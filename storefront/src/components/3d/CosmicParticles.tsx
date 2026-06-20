@@ -33,8 +33,8 @@ export function CosmicParticles({ count = 3000 }: { count?: number }) {
 
   useFrame((_state, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.03;
-      meshRef.current.rotation.x += delta * 0.01;
+      meshRef.current.rotation.y += delta * 0.003;
+      meshRef.current.rotation.x += delta * 0.001;
     }
   });
 
@@ -55,7 +55,7 @@ export function CosmicParticles({ count = 3000 }: { count?: number }) {
         sizeAttenuation
         vertexColors
         transparent
-        opacity={0.9}
+        opacity={0.3}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />

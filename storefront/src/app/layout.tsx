@@ -42,7 +42,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <body
-          className="min-h-full flex flex-col bg-[#020010] text-white overflow-x-hidden"
+          className="min-h-full flex flex-col bg-[#030303] text-white overflow-x-hidden"
           suppressHydrationWarning
         >
           <CustomCursor />

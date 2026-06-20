@@ -30,8 +30,8 @@ export default function StarField({ count = 3000 }: { count?: number }) {
   useFrame((state) => {
     if (meshRef.current) {
       // Gentle drift
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.015;
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.005;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.0015;
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.0005;
     }
   });
 
