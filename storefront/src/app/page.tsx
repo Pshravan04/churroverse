@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Star, Zap, Shield, ChevronDown, Rocket, ArrowRight } from "lucide-react";
+import ProductGrid from "@/components/ui/product-grid";
 
 // ── Animation helpers ────────────────────────────────────────────────────────
 const fadeUp = {
@@ -202,58 +203,7 @@ export default function Home() {
             </motion.h2>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={stagger}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {featuredProducts.map((p) => (
-              <motion.div
-                key={p.id}
-                variants={fadeUp}
-                whileHover={{ y: -8 }}
-                className="group relative rounded-3xl border border-white/10 overflow-hidden bg-black/40 backdrop-blur-md transition-all duration-300 hover:border-orange-500/40"
-                style={{
-                  boxShadow: `0 0 0 0 ${p.glow}`,
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 60px ${p.glow}`;
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 0 ${p.glow}`;
-                }}
-              >
-                {/* Badge */}
-                <div className="absolute top-4 right-4 z-10 bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  {p.tag}
-                </div>
-
-                {/* Product visual */}
-                <div className={`aspect-square w-full bg-gradient-to-br ${p.color} flex items-center justify-center`}>
-                  <span className="text-8xl">{p.emoji}</span>
-                </div>
-
-                {/* Info */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-1">{p.name}</h3>
-                  <p className="text-gray-400 text-sm mb-4">{p.description}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-2xl font-black text-orange-400">₹{p.price}</p>
-                    <Link href={`/products/${p.id}`}>
-                      <Button
-                        size="sm"
-                        className="bg-white text-black hover:bg-yellow-400 rounded-full font-bold transition-all"
-                      >
-                        Add to Cart
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+          <ProductGrid products={featuredProducts} />
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -313,8 +263,11 @@ export default function Home() {
                 variants={fadeUp}
                 whileHover={{ scale: 1.08, y: -6 }}
                 whileTap={{ scale: 0.97 }}
-                className="group relative aspect-square rounded-full border-2 border-white/10 cursor-pointer flex flex-col items-center justify-center overflow-hidden transition-all duration-300"
-                style={{ background: `radial-gradient(circle at 35% 35%, ${planet.glow}40, #020010 70%)` }}
+                className="group relative aspect-square rounded-full border-2 border-white/10 cursor-pointer flex flex-col items-center justify-center overflow-hidden transition-all duration-300 animate-orbital-spin"
+                style={{
+                  background: `radial-gradient(circle at 35% 35%, ${planet.glow}40, #020010 70%)`,
+                  boxShadow: `0 0 40px ${planet.glow}60`,
+                }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor = planet.glow;
                   (e.currentTarget as HTMLElement).style.boxShadow = `0 0 40px ${planet.glow}60`;
@@ -369,7 +322,7 @@ export default function Home() {
                 variants={fadeUp}
                 custom={i * 0.1}
                 whileHover={{ y: -6 }}
-                className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-yellow-500/40 hover:bg-yellow-900/10 transition-all duration-300"
+                className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-yellow-500/40 hover:bg-yellow-900/10 transition-all duration-300 animate-stretch-pulse"
               >
                 <div className="text-5xl mb-4">{p.emoji}</div>
                 <h3 className="text-lg font-bold text-white mb-1">{p.name}</h3>
@@ -383,9 +336,9 @@ export default function Home() {
                   <span className="text-xs text-gray-500 ml-1">({p.reviews})</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-xl font-black text-yellow-400">₹{p.price}</p>
+                  <p className="text-xl font-black text-yellow-400 animate-button-pulse">₹{p.price}</p>
                   <Link href={`/products/${p.id}`}>
-                    <Button size="sm" variant="ghost" className="text-xs text-gray-400 hover:text-white">
+                    <Button size="sm" variant="ghost" className="text-xs text-gray-400 hover:text-white hover:animate-button-glow">
                       View →
                     </Button>
                   </Link>
