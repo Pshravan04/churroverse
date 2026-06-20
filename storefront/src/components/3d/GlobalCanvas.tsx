@@ -5,6 +5,7 @@ import { Preload } from "@react-three/drei";
 import PlaceholderChurroPlanet from "./PlaceholderChurroPlanet";
 import StarField from "./StarField";
 import UFOFleet from "./UFOFleet";
+import { CosmicParticles } from "./CosmicParticles";
 
 export default function GlobalCanvas({ children }: { children?: React.ReactNode }) {
   return (

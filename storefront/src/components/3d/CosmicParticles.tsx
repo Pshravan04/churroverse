@@ -1,86 +1,64 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
-import { Points, PointMaterial, BufferGeometry, BufferAttribute } from '@react-three/fiber';
-import { createShaderMaterial } from '@/lib/utils';
+import { useRef, useMemo } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
-export function CosmicParticles({ count = 3000 }) {
-  const [particlePositions] = useState(() => {
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i += 3) {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 200;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
-      const z = Math.random() * 100 - 50;
+export function CosmicParticles({ count = 3000 }: { count?: number }) {
+  const meshRef = useRef<THREE.Points>(null!);
 
-      positions[i] = x;
-      positions[i + 1] = y;
-      positions[i + 2] = z;
+  const [positions, colors] = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const col = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      const radius = 80 + Math.random() * 120;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      pos[i3] = radius * Math.sin(phi) * Math.cos(theta);
+      pos[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      pos[i3 + 2] = radius * Math.cos(phi);
+
+      const c = new THREE.Color().setHSL(
+        0.07 + Math.random() * 0.08,
+        0.6 + Math.random() * 0.3,
+        0.4 + Math.random() * 0.4
+      );
+      col[i3] = c.r;
+      col[i3 + 1] = c.g;
+      col[i3 + 2] = c.b;
     }
-    return [positions];
+    return [pos, col];
+  }, [count]);
+
+  useFrame((_state, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += delta * 0.03;
+      meshRef.current.rotation.x += delta * 0.01;
+    }
   });
 
-  const pointsRef = useRef();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  // Handle mouse movement for magnetic effect
-  useEffect(() => {
-    const handleMouseMove = (event) => {
-      setMousePosition({
-        x: (event.clientX / window.innerWidth - 0.5) * 2,
-        y: -(event.clientY / window.innerHeight - 0.5) * 2,
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    if (pointsRef.current) {
-      const geometry = pointsRef.current.geometry;
-      geometry.attributes.position.needsUpdate = true;
-    }
-  }, [mousePosition]);
-
   return (
-    <Points ref={pointsRef} position={particlePositions}>
-      <BufferGeometry>
-        <BufferAttribute
-          itemSize={3}
-          array={particlePositions[0]}
-          typed="Float32BufferAttribute"
+    <points ref={meshRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[positions, 3]}
         />
-      </BufferGeometry>
-      <PointMaterial
-        size={0.12}
-        sizeAttenuation={true}
-        color="#ea580c"
-        transparent={true}
-        opacity={0.7}
+        <bufferAttribute
+          attach="attributes-color"
+          args={[colors, 3]}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.4}
+        sizeAttenuation
+        vertexColors
+        transparent
+        opacity={0.9}
         depthWrite={false}
-        blending="additive"
-        vertexColors={true}
+        blending={THREE.AdditiveBlending}
       />
-      {createShaderMaterial({
-        name: 'particle-glow',
-        uniforms: {
-          time: { value: 0 },
-          mousePosition: { value: mousePosition },
-        },
-        vertexShader: `...`, // Simplified for brevity
-        fragmentShader: `...`, // Simplified for brevity
-      })}
-    </Points>
+    </points>
   );
-}
-
-function createShaderMaterial(config: any) {
-  const material = new PointsMaterial({ ...config });
-  material.onBeforeCompile = (shader) => {
-    // Custom shader modifications would go here
-    return shader;
-  };
-  return material;
 }

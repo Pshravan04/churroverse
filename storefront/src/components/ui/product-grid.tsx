@@ -1,111 +1,105 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { Star } from "lucide-react";
+
+type ProductGridProps = {
+  products: {
+    id: string;
+    name: string;
+    price: number;
+    tag?: string;
+    emoji?: string;
+    description?: string;
+    rating?: number;
+    reviews?: number;
+  }[];
+  onAddToCart?: (productId: string) => void;
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" as const, delay },
+  }),
+};
 
 export default function ProductGrid({
   products,
-  onAddToCart
-}) {
-  const [hoveredProduct, setHoveredProduct] = useState(null);
-  const gridRef = useRef(null);
-
-  const handleMouseEnter = (productId) => {
-    setHoveredProduct(productId);
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredProduct(null);
-  };
-
+}: ProductGridProps) {
   return (
-    <div
-      ref={gridRef}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-0"
-      onMouseMove={(e) => {
-        if (!hoveredProduct || !gridRef.current) return;
-
-        const rect = gridRef.current.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-        parallaxEffect(x, y);
-      }}
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
     >
-      {products.map((product) => (
-        <Motion
+      {products.map((product, index) => (
+        <motion.div
           key={product.id}
-          initial={{ scale: 1, y: 0 }}
-          whileHover={{
-            scale: hoveredProduct === product.id ? 1.03 : 1,
-            rotateX: hoveredProduct === product.id ? x * 15 : 0,
-            rotateY: hoveredProduct === product.id ? -y * 15 : 0,
-          }}
-          transition={{ type: "spring", stiffness: 300 }}
-          className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 hover:border-orange-500/40 transition-all duration-300"
-          onMouseEnter={() => handleMouseEnter(product.id)}
-          onMouseLeave={handleMouseLeave}
-          style={{
-            perspective: 1000px,
-            transformStyle: "preserve-3d"
-          }}
+          variants={fadeUp}
+          custom={index * 0.1}
+          whileHover={{ y: -8 }}
+          className="group relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden hover:border-orange-500/40 transition-all duration-300"
         >
-          <div style={{ width: "100%", height: "100%" }}>
-            {product.images.map((img, idx) => (
-              <div key={idx} className="relative h-48 rounded-lg overflow-hidden">
-                <img
-                  src={img}
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                {idx === 0 && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-transparent">
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <p className="text-sm font-medium mb-1">New Arrival</p>
-                      <p className="text-lg font-bold">{product.price}</p>
-                      <Button size="sm" className="mt-2 bg-orange-600 hover:bg-orange-500 text-white rounded-full px-3 py-1">Add to Cart</Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+          {/* Badge */}
+          {product.tag && (
+            <div className="absolute top-4 right-4 z-10 bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              {product.tag}
+            </div>
+          )}
 
-            <div className="p-4 flex flex-col justify-between">
-              <h3 className="text-lg font-bold text-white">{product.name}</h3>
-              <p className="text-gray-300 text-sm max-h-12 overflow-hidden text-ellipsis">{product.description}</p>
-              <div className="flex items-center gap-1 mt-2">
+          {/* Product visual */}
+          <div className="aspect-square w-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+            {product.emoji ? (
+              <span className="text-8xl">{product.emoji}</span>
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-orange-500/20 blur-3xl" />
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-white mb-1">{product.name}</h3>
+            {product.description && (
+              <p className="text-gray-400 text-sm mb-4">{product.description}</p>
+            )}
+
+            {/* Rating */}
+            {product.rating && (
+              <div className="flex items-center gap-1 mb-4">
                 {Array.from({ length: 5 }).map((_, idx) => (
                   <Star
                     key={idx}
-                    className={`w-4 h-4 ${idx < Math.floor(product.rating)} ? "text-yellow-400 fill-yellow-400" : "text-gray-600"} spring`
+                    className={`w-3 h-3 ${
+                      idx < Math.floor(product.rating!)
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-600"
+                    }`}
                   />
                 ))}
-                <span className="text-xs text-gray-500 ml-1">{product.reviews} reviews</span>
+                {product.reviews && (
+                  <span className="text-xs text-gray-500 ml-1">({product.reviews})</span>
+                )}
               </div>
+            )}
+
+            {/* Price + CTA */}
+            <div className="flex items-center justify-between">
+              <p className="text-2xl font-black text-orange-400">₹{product.price}</p>
+              <Link
+                href={`/products/${product.id}`}
+                className="inline-flex items-center justify-center h-8 px-3 bg-white text-black hover:bg-yellow-400 rounded-full text-sm font-bold transition-all"
+              >
+                View Details
+              </Link>
             </div>
           </div>
-        </Motion>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
-
-function parallaxEffect(x, y) {
-  // Creates subtle parallax movement
-  const products = document.querySelectorAll('.product-card');
-  products.forEach(product => {
-    const rect = product.getBoundingClientRect();
-    const xp = (x * 100);
-    const yp = (y * 100);
-
-    product.style.transform = `
-      translateX(${xp}px)
-      translateY(${yp}px)
-      scale(${1 + Math.abs(x) * 0.02})
-    `;
-  });
-}
-
-const Star = ({ className }) => {
-  return <span className={className}>★</span>;
-};

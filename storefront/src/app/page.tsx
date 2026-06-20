@@ -263,7 +263,7 @@ export default function Home() {
                 variants={fadeUp}
                 whileHover={{ scale: 1.08, y: -6 }}
                 whileTap={{ scale: 0.97 }}
-                className="group relative aspect-square rounded-full border-2 border-white/10 cursor-pointer flex flex-col items-center justify-center overflow-hidden transition-all duration-300 animate-orbital-spin"
+                className="group relative aspect-square rounded-full border-2 border-white/10 cursor-pointer flex flex-col items-center justify-center overflow-hidden transition-all duration-300"
                 style={{
                   background: `radial-gradient(circle at 35% 35%, ${planet.glow}40, #020010 70%)`,
                   boxShadow: `0 0 40px ${planet.glow}60`,
@@ -322,7 +322,7 @@ export default function Home() {
                 variants={fadeUp}
                 custom={i * 0.1}
                 whileHover={{ y: -6 }}
-                className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-yellow-500/40 hover:bg-yellow-900/10 transition-all duration-300 animate-stretch-pulse"
+                className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-yellow-500/40 hover:bg-yellow-900/10 transition-all duration-300"
               >
                 <div className="text-5xl mb-4">{p.emoji}</div>
                 <h3 className="text-lg font-bold text-white mb-1">{p.name}</h3>
@@ -336,9 +336,9 @@ export default function Home() {
                   <span className="text-xs text-gray-500 ml-1">({p.reviews})</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-xl font-black text-yellow-400 animate-button-pulse">₹{p.price}</p>
+                  <p className="text-xl font-black text-yellow-400">₹{p.price}</p>
                   <Link href={`/products/${p.id}`}>
-                    <Button size="sm" variant="ghost" className="text-xs text-gray-400 hover:text-white hover:animate-button-glow">
+                     <Button size="sm" variant="ghost" className="text-xs text-gray-400 hover:text-white">
                       View →
                     </Button>
                   </Link>
