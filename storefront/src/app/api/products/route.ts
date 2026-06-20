@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { injectImages } from '@/lib/products';
 import type { Product } from '@/lib/types';
 
 export async function GET(request: Request) {
@@ -40,7 +41,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ products: (data ?? []) as Product[] });
+    const mapped = (data ?? []).map((p: any) => injectImages(p as Product));
+    return NextResponse.json({ products: mapped });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message ?? 'Failed to fetch products' }, { status: 500 });
   }
