@@ -104,14 +104,22 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                 className="absolute inset-16 rounded-full border border-white/5"
               />
 
-              {/* Main product emoji */}
-              <motion.span
+              {/* Main product visual */}
+              <motion.div
                 animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="text-[8rem] relative z-10"
+                className="relative z-10 w-64 h-64 flex items-center justify-center"
               >
-                {product.emoji}
-              </motion.span>
+                {product.images && product.images.length > 0 ? (
+                  <img
+                    src={product.images[0]}
+                    alt={product.name}
+                    className="w-full h-full object-contain filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]"
+                  />
+                ) : (
+                  <span className="text-[8rem]">{product.emoji}</span>
+                )}
+              </motion.div>
 
               {/* Category badge */}
               <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 text-xs text-orange-400 font-mono">
@@ -121,9 +129,17 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
             {/* Thumbnail row */}
             <div className="flex gap-3 mt-4">
-              {["Front", "Cross-Section", "Plated"].map((view) => (
+              {["Front", "Cross-Section", "Plated"].map((view, idx) => (
                 <div key={view} className="flex-1 aspect-square rounded-xl border border-white/10 bg-white/5 flex items-center justify-center cursor-pointer hover:border-orange-500/50 transition-colors">
-                  <span className="text-2xl">{product.emoji}</span>
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={product.images[0]}
+                      alt={`${product.name} ${view}`}
+                      className="w-12 h-12 object-contain filter drop-shadow-[0_5px_10px_rgba(0,0,0,0.5)]"
+                    />
+                  ) : (
+                    <span className="text-2xl">{product.emoji}</span>
+                  )}
                 </div>
               ))}
             </div>

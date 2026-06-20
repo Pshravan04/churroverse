@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Star, Zap, Shield, ChevronDown, Rocket, ArrowRight,
   Sparkles, Clock, Truck, Award, Heart, ShoppingCart, Plus, Minus, Flame, Cookie, Snowflake,
@@ -42,18 +42,18 @@ const FEATURES = [
 ];
 
 const MOCK_FEATURED: Product[] = [
-  { id: "m1", slug: "cosmic-churro", name: "Cosmic Churro Classic", description: "Cinnamon-dusted spirals, caramel-filled, lightly crispy.", long_desc: null, price: 24900, compare_price: null, category: "churro", emoji: "🌀", stock: 50, rating: 4.8, review_count: 312, tag: "Best Seller", featured: true, images: [], metadata: {}, created_at: "" },
-  { id: "m2", slug: "dark-matter", name: "Dark Matter Chocolate", description: "Rich 70% dark chocolate ganache fused into every bite.", long_desc: null, price: 29900, compare_price: 34900, category: "churro", emoji: "🍫", stock: 40, rating: 4.9, review_count: 218, tag: "New Arrival", featured: true, images: [], metadata: {}, created_at: "" },
-  { id: "m3", slug: "stardust-biscoff", name: "Stardust Biscoff", description: "Belgian Biscoff cream swirled through crunchy dough.", long_desc: null, price: 27900, compare_price: null, category: "churro", emoji: "⭐", stock: 35, rating: 4.7, review_count: 156, tag: "Fan Favorite", featured: true, images: [], metadata: {}, created_at: "" },
-  { id: "m8", slug: "supernova-matcha", name: "Supernova Matcha", description: "Japanese ceremonial matcha cream with white chocolate drizzle.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "🍵", stock: 20, rating: 4.9, review_count: 189, tag: "Limited", featured: true, images: [], metadata: {}, created_at: "" },
+  { id: "m1", slug: "cosmic-churro", name: "Cosmic Churro Classic", description: "Cinnamon-dusted spirals, caramel-filled, lightly crispy.", long_desc: null, price: 24900, compare_price: null, category: "churro", emoji: "🌀", stock: 50, rating: 4.8, review_count: 312, tag: "Best Seller", featured: true, images: ["/products/classic.png"], metadata: {}, created_at: "" },
+  { id: "m2", slug: "dark-matter", name: "Dark Matter Chocolate", description: "Rich 70% dark chocolate ganache fused into every bite.", long_desc: null, price: 29900, compare_price: 34900, category: "churro", emoji: "🍫", stock: 40, rating: 4.9, review_count: 218, tag: "New Arrival", featured: true, images: ["/products/dark-matter.png"], metadata: {}, created_at: "" },
+  { id: "m3", slug: "stardust-biscoff", name: "Stardust Biscoff", description: "Belgian Biscoff cream swirled through crunchy dough.", long_desc: null, price: 27900, compare_price: null, category: "churro", emoji: "⭐", stock: 35, rating: 4.7, review_count: 156, tag: "Fan Favorite", featured: true, images: ["/products/biscoff.png"], metadata: {}, created_at: "" },
+  { id: "m8", slug: "supernova-matcha", name: "Supernova Matcha", description: "Japanese ceremonial matcha cream with white chocolate drizzle.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "🍵", stock: 20, rating: 4.9, review_count: 189, tag: "Limited", featured: true, images: ["/products/matcha.png"], metadata: {}, created_at: "" },
 ];
 
 
 const MOCK_BESTSELLERS: Product[] = [
-  { id: "m4", slug: "nebula-nutella", name: "Nebula Nutella", description: "Hazelnut cocoa spread meets warm churro dough.", long_desc: null, price: 28900, compare_price: null, category: "churro", emoji: "🌌", stock: 30, rating: 4.9, review_count: 312, tag: null, featured: false, images: [], metadata: {}, created_at: "" },
-  { id: "m5", slug: "solar-strawberry", name: "Solar Strawberry", description: "Sun-ripened strawberries in a sweet glaze.", long_desc: null, price: 25900, compare_price: null, category: "churro", emoji: "🌟", stock: 45, rating: 4.8, review_count: 218, tag: null, featured: false, images: [], metadata: {}, created_at: "" },
-  { id: "m6", slug: "orion-oreo", name: "Orion Oreo Blast", description: "Crushed Oreo cookies fused into every ridge.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "🪐", stock: 25, rating: 5.0, review_count: 156, tag: null, featured: false, images: [], metadata: {}, created_at: "" },
-  { id: "m7", slug: "galaxy-caramel", name: "Galaxy Caramel", description: "House-made caramel sauce, stretched and pulled to perfection.", long_desc: null, price: 26900, compare_price: null, category: "churro", emoji: "✨", stock: 60, rating: 4.7, review_count: 445, tag: null, featured: false, images: [], metadata: {}, created_at: "" },
+  { id: "m4", slug: "nebula-nutella", name: "Nebula Nutella", description: "Hazelnut cocoa spread meets warm churro dough.", long_desc: null, price: 28900, compare_price: null, category: "churro", emoji: "🌌", stock: 30, rating: 4.9, review_count: 312, tag: null, featured: false, images: ["/products/nutella.png"], metadata: {}, created_at: "" },
+  { id: "m5", slug: "solar-strawberry", name: "Solar Strawberry", description: "Sun-ripened strawberries in a sweet glaze.", long_desc: null, price: 25900, compare_price: null, category: "churro", emoji: "🌟", stock: 45, rating: 4.8, review_count: 218, tag: null, featured: false, images: ["/products/strawberry.png"], metadata: {}, created_at: "" },
+  { id: "m6", slug: "orion-oreo", name: "Orion Oreo Blast", description: "Crushed Oreo cookies fused into every ridge.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "🪐", stock: 25, rating: 5.0, review_count: 156, tag: null, featured: false, images: ["/products/oreo.png"], metadata: {}, created_at: "" },
+  { id: "m7", slug: "galaxy-caramel", name: "Galaxy Caramel", description: "House-made caramel sauce, stretched and pulled to perfection.", long_desc: null, price: 26900, compare_price: null, category: "churro", emoji: "✨", stock: 60, rating: 4.7, review_count: 445, tag: null, featured: false, images: ["/products/caramel.png"], metadata: {}, created_at: "" },
 ];
 
 const MOCK_REVIEWS = [
@@ -79,159 +79,150 @@ const CARD_ACCENTS = [
   { glow: "rgba(234,88,12,0.35)",  ring: "border-orange-500/30",  tagBg: "bg-orange-600",     gradFrom: "from-orange-950/60",  gradTo: "to-red-950/40",    text: "text-orange-400",  btn: "from-orange-600 to-red-600" },
   { glow: "rgba(168,85,247,0.35)", ring: "border-purple-500/30",  tagBg: "bg-purple-600",     gradFrom: "from-purple-950/60", gradTo: "to-indigo-950/40", text: "text-purple-400", btn: "from-purple-600 to-indigo-600" },
   { glow: "rgba(245,158,11,0.35)", ring: "border-amber-500/30",   tagBg: "bg-amber-600",      gradFrom: "from-amber-950/60",  gradTo: "to-orange-950/40", text: "text-amber-400",  btn: "from-amber-600 to-orange-600" },
+  { glow: "rgba(34,197,94,0.35)",  ring: "border-emerald-500/30", tagBg: "bg-emerald-600",    gradFrom: "from-emerald-950/60",gradTo: "to-teal-950/40",  text: "text-emerald-400", btn: "from-emerald-600 to-teal-600" },
 ];
 
-// Spotlight (large) card — left column
-function SpotlightCard({ product, accent }: { product: Product; accent: typeof CARD_ACCENTS[0] }) {
+function FeaturedAccordionItem({
+  product,
+  index,
+  isHovered,
+  onHover,
+}: {
+  product: Product;
+  index: number;
+  isHovered: boolean;
+  onHover: () => void;
+}) {
+  const accent = CARD_ACCENTS[index % CARD_ACCENTS.length];
   const savings = product.compare_price ? product.compare_price - product.price : 0;
+
   return (
     <motion.div
-      variants={fadeUp}
-      custom={0}
-      whileHover={{ scale: 1.01 }}
-      className={`group relative rounded-3xl border ${accent.ring} bg-white/[0.03] backdrop-blur-md overflow-hidden h-full flex flex-col transition-all duration-500`}
+      layout
+      onMouseEnter={onHover}
+      onClick={onHover}
+      className={`group relative rounded-[2rem] border ${accent.ring} overflow-hidden cursor-pointer flex flex-col lg:flex-row bg-white/[0.02] backdrop-blur-md transition-all duration-500`}
+      animate={{
+        flex: isHovered ? (typeof window !== "undefined" && window.innerWidth >= 1024 ? 3.5 : 2) : 1,
+      }}
+      transition={{ type: "spring", bounce: 0.15, duration: 0.8 }}
     >
-      {/* Animated background glow */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* Background glow & gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${accent.gradFrom} ${accent.gradTo} transition-opacity duration-700 ${isHovered ? "opacity-80" : "opacity-30"}`} />
+      
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0 m-auto w-64 h-64 lg:w-96 lg:h-96 rounded-full blur-[100px] pointer-events-none"
+        style={{ background: accent.glow }}
+      />
+
+      {/* Visual Area */}
+      <div className="relative z-10 flex items-center justify-center p-6 lg:p-12 h-32 lg:h-full lg:w-48 shrink-0">
         <motion.div
-          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[80px]"
-          style={{ background: accent.glow }}
-        />
-        <div className={`absolute inset-0 bg-gradient-to-br ${accent.gradFrom} ${accent.gradTo} opacity-60`} />
-      </div>
-
-      {/* Tag */}
-      {product.tag && (
-        <div className="absolute top-4 left-4 z-10">
-          <span className={`${accent.tagBg} text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg`}>
-            {product.tag}
-          </span>
-        </div>
-      )}
-
-      {/* Emoji display */}
-      <Link href={`/products/${product.id}`} className="relative z-10 flex-1 flex items-center justify-center py-12 px-8">
-        <motion.div
-          animate={{ y: [0, -10, 0], rotate: [-2, 2, -2] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="text-[9rem] leading-none select-none filter drop-shadow-2xl"
+          layout
+          animate={{
+            scale: isHovered ? 1.4 : 1,
+            rotate: isHovered ? [0, -5, 5, 0] : 0,
+            y: isHovered ? [0, -10, 0] : 0,
+          }}
+          transition={{
+            y: { repeat: Infinity, duration: 3, ease: "easeInOut" },
+            rotate: { repeat: Infinity, duration: 6, ease: "easeInOut" },
+          }}
+          className="relative drop-shadow-2xl select-none flex items-center justify-center w-full h-full"
         >
-          {product.emoji}
-        </motion.div>
-        {/* Orbit ring */}
-        <div className={`absolute w-56 h-56 rounded-full border ${accent.ring} opacity-20 group-hover:opacity-40 transition-opacity duration-500`} />
-        <div className={`absolute w-40 h-40 rounded-full border ${accent.ring} opacity-10 group-hover:opacity-25 transition-opacity duration-500`} />
-      </Link>
-
-      {/* Info panel */}
-      <div className="relative z-10 p-6 pt-4 space-y-4">
-        {/* Rating + reviews */}
-        <div className="flex items-center gap-2">
-          <StarRating rating={product.rating} size="md" />
-          <span className={`text-xs font-bold ${accent.text}`}>{product.rating}</span>
-          <span className="text-gray-600 text-xs">({product.review_count} reviews)</span>
-        </div>
-
-        <div>
-          <Link href={`/products/${product.id}`}>
-            <h3 className={`text-2xl font-black text-white group-hover:${accent.text} transition-colors leading-tight`}>
-              {product.name}
-            </h3>
-          </Link>
-          <p className="text-gray-400 text-sm leading-relaxed mt-2">{product.description}</p>
-        </div>
-
-        {/* Price row */}
-        <div className="flex items-end justify-between pt-1">
-          <div>
-            <div className="flex items-baseline gap-2">
-              <span className={`text-3xl font-black ${accent.text}`}>{formatPrice(product.price)}</span>
-              {product.compare_price && (
-                <span className="text-sm text-gray-600 line-through">{formatPrice(product.compare_price)}</span>
-              )}
-            </div>
-            {savings > 0 && (
-              <span className="text-xs text-emerald-400 font-bold">Save {formatPrice(savings)}</span>
-            )}
-          </div>
-          <Link href={`/products/${product.id}`}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              className={`flex items-center gap-2 bg-gradient-to-r ${accent.btn} text-white font-bold text-sm px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-shadow`}
-            >
-              <ShoppingCart className="w-4 h-4" /> Order Now
-            </motion.button>
-          </Link>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// Compact card — right column stack
-function CompactFeaturedCard({ product, index, accent }: { product: Product; index: number; accent: typeof CARD_ACCENTS[0] }) {
-  return (
-    <motion.div
-      variants={fadeUp}
-      custom={index * 0.12}
-      whileHover={{ x: 6 }}
-      className={`group relative rounded-2xl border ${accent.ring} bg-white/[0.03] backdrop-blur-sm overflow-hidden flex items-stretch transition-all duration-300 hover:bg-white/[0.06]`}
-    >
-      <div className={`absolute inset-0 bg-gradient-to-r ${accent.gradFrom} ${accent.gradTo} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-      {/* Emoji side */}
-      <Link href={`/products/${product.id}`}
-        className="relative z-10 flex items-center justify-center w-28 flex-shrink-0 bg-white/[0.03]"
-      >
-        <div className="absolute inset-0" style={{ background: `radial-gradient(circle, ${accent.glow} 0%, transparent 70%)` }} />
-        <motion.span
-          animate={{ rotate: [-1, 1, -1] }}
-          transition={{ duration: 3 + index, repeat: Infinity }}
-          className="text-5xl relative z-10"
-        >
-          {product.emoji}
-        </motion.span>
-      </Link>
-
-      {/* Info side */}
-      <div className="relative z-10 flex-1 p-4 flex flex-col justify-between">
-        <div>
-          {product.tag && (
-            <span className={`${accent.tagBg} text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-1.5 inline-block`}>
-              {product.tag}
-            </span>
+          {product.images && product.images.length > 0 ? (
+            <img 
+              src={product.images[0]} 
+              alt={product.name} 
+              className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]" 
+              style={{ maxHeight: '200px' }}
+            />
+          ) : (
+            <span className="text-[5rem] lg:text-[7rem]">{product.emoji}</span>
           )}
-          <Link href={`/products/${product.id}`}>
-            <h3 className={`font-black text-white text-base group-hover:${accent.text} transition-colors leading-tight`}>
+        </motion.div>
+      </div>
+
+      {/* Content Area */}
+      <AnimatePresence mode="popLayout">
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="relative z-10 p-6 pt-0 lg:p-12 lg:pl-0 flex flex-col justify-center flex-1 min-w-[280px]"
+          >
+            {product.tag && (
+              <span className={`self-start ${accent.tagBg} text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg mb-3 lg:mb-4`}>
+                {product.tag}
+              </span>
+            )}
+            
+            <h3 className={`text-3xl lg:text-5xl font-black text-white leading-tight mb-2 lg:mb-3 group-hover:${accent.text} transition-colors`}>
               {product.name}
             </h3>
-          </Link>
-          <div className="flex items-center gap-1.5 mt-1">
-            <StarRating rating={product.rating} />
-            <span className="text-gray-600 text-[10px]">({product.review_count})</span>
-          </div>
-        </div>
+            
+            <p className="text-gray-300 text-sm lg:text-base mb-4 lg:mb-6 max-w-md line-clamp-2 lg:line-clamp-3">
+              {product.description}
+            </p>
 
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-baseline gap-1.5">
-            <span className={`text-lg font-black ${accent.text}`}>{formatPrice(product.price)}</span>
-            {product.compare_price && (
-              <span className="text-[11px] text-gray-600 line-through">{formatPrice(product.compare_price)}</span>
-            )}
-          </div>
-          <Link href={`/products/${product.id}`}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className={`text-[11px] font-bold ${accent.text} border ${accent.ring} px-3 py-1.5 rounded-full flex items-center gap-1 hover:bg-white/5 transition-colors`}
-            >
-              View <ArrowRight className="w-3 h-3" />
-            </motion.button>
-          </Link>
-        </div>
-      </div>
+            <div className="flex items-center gap-3 mb-6 lg:mb-8">
+              <StarRating rating={product.rating} size="md" />
+              <span className={`font-bold ${accent.text}`}>{product.rating}</span>
+              <span className="text-gray-500 text-xs lg:text-sm">({product.review_count} reviews)</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mt-auto gap-4">
+              <div className="flex flex-col">
+                {product.compare_price && (
+                  <span className="text-sm text-gray-500 line-through mb-1">
+                    {formatPrice(product.compare_price)}
+                  </span>
+                )}
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-3xl lg:text-4xl font-black ${accent.text}`}>
+                    {formatPrice(product.price)}
+                  </span>
+                  {savings > 0 && (
+                    <span className="text-xs text-emerald-400 font-bold ml-2">
+                      Save {formatPrice(savings)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              <Link href={`/products/${product.id}`} className="shrink-0 w-full sm:w-auto">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r ${accent.btn} text-white font-bold px-6 py-3 lg:px-8 lg:py-4 rounded-full shadow-lg transition-shadow hover:shadow-2xl hover:shadow-${accent.tagBg.replace("bg-", "")}/50`}
+                >
+                  <ShoppingCart className="w-5 h-5" /> Order Now
+                </motion.button>
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Non-hovered state vertical title (Desktop) / Horizontal (Mobile) */}
+      <AnimatePresence>
+        {!isHovered && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-6 left-0 right-0 lg:bottom-auto lg:top-0 lg:left-0 lg:right-0 lg:h-full flex items-center justify-center pointer-events-none px-4 text-center"
+          >
+            <h3 className="text-sm lg:text-xl font-black uppercase tracking-widest lg:tracking-[0.2em] text-white/50 group-hover:text-white/80 transition-colors lg:origin-center lg:-rotate-90 whitespace-nowrap">
+              {product.name}
+            </h3>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -481,9 +472,9 @@ function HeroSection() {
 }
 
 function FeaturedSection({ products }: { products: Product[] }) {
+  const [hoveredIndex, setHoveredIndex] = useState<number>(0);
+
   if (!products.length) return null;
-  const [p0, p1, p2, p3] = products;
-  const a0 = CARD_ACCENTS[0], a1 = CARD_ACCENTS[1], a2 = CARD_ACCENTS[2], a3 = CARD_ACCENTS[0];
 
   return (
     <section className="w-full py-24 md:py-36 relative overflow-hidden">
@@ -516,22 +507,21 @@ function FeaturedSection({ products }: { products: Product[] }) {
             </p>
           </motion.div>
 
-          {/* Bento grid — 2 columns, each with 1 spotlight + 1 compact */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {/* Left column */}
-            <div className="flex flex-col gap-5">
-              {p0 && <SpotlightCard product={p0} accent={a0} />}
-              {p1 && <CompactFeaturedCard product={p1} index={1} accent={a1} />}
-            </div>
-            {/* Right column */}
-            <div className="flex flex-col gap-5">
-              {p2 && <SpotlightCard product={p2} accent={a2} />}
-              {p3 && <CompactFeaturedCard product={p3} index={3} accent={a3} />}
-            </div>
-          </div>
+          {/* Accordion Gallery */}
+          <motion.div variants={fadeUp} className="flex flex-col lg:flex-row gap-4 h-[700px] lg:h-[550px]">
+            {products.slice(0, 4).map((p, i) => (
+              <FeaturedAccordionItem
+                key={p.id}
+                product={p}
+                index={i}
+                isHovered={hoveredIndex === i}
+                onHover={() => setHoveredIndex(i)}
+              />
+            ))}
+          </motion.div>
 
           {/* CTA */}
-          <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 mt-12">
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-16">
             <Link href="/products">
               <motion.button
                 whileHover={{ scale: 1.04 }}
@@ -550,6 +540,7 @@ function FeaturedSection({ products }: { products: Product[] }) {
               </motion.button>
             </Link>
           </motion.div>
+
         </motion.div>
       </div>
     </section>
@@ -707,6 +698,81 @@ function CategoriesSection() {
   );
 }
 
+
+// Compact card — used in Bestsellers stack
+function CompactFeaturedCard({ product, index, accent }: { product: Product; index: number; accent: typeof CARD_ACCENTS[0] }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      custom={index * 0.12}
+      whileHover={{ x: 6 }}
+      className={`group relative rounded-2xl border ${accent.ring} bg-white/[0.03] backdrop-blur-sm overflow-hidden flex items-stretch transition-all duration-300 hover:bg-white/[0.06]`}
+    >
+      <div className={`absolute inset-0 bg-gradient-to-r ${accent.gradFrom} ${accent.gradTo} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+
+      {/* Visual side */}
+      <Link href={`/products/${product.id}`}
+        className="relative z-10 flex items-center justify-center w-28 flex-shrink-0 bg-white/[0.03]"
+      >
+        <div className="absolute inset-0" style={{ background: `radial-gradient(circle, ${accent.glow} 0%, transparent 70%)` }} />
+        {product.images && product.images.length > 0 ? (
+          <motion.img 
+            animate={{ rotate: [-2, 2, -2] }}
+            transition={{ duration: 3 + index, repeat: Infinity }}
+            src={product.images[0]}
+            alt={product.name}
+            className="w-20 h-20 object-contain relative z-10 filter drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]"
+          />
+        ) : (
+          <motion.span
+            animate={{ rotate: [-1, 1, -1] }}
+            transition={{ duration: 3 + index, repeat: Infinity }}
+            className="text-5xl relative z-10"
+          >
+            {product.emoji}
+          </motion.span>
+        )}
+      </Link>
+
+      {/* Info side */}
+      <div className="relative z-10 flex-1 p-4 flex flex-col justify-between">
+        <div>
+          {product.tag && (
+            <span className={`${accent.tagBg} text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-1.5 inline-block`}>
+              {product.tag}
+            </span>
+          )}
+          <Link href={`/products/${product.id}`}>
+            <h3 className={`font-black text-white text-base group-hover:${accent.text} transition-colors leading-tight`}>
+              {product.name}
+            </h3>
+          </Link>
+          <div className="flex items-center gap-1.5 mt-1">
+            <StarRating rating={product.rating} />
+            <span className="text-gray-600 text-[10px]">({product.review_count})</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-baseline gap-1.5">
+            <span className={`text-lg font-black ${accent.text}`}>{formatPrice(product.price)}</span>
+            {product.compare_price && (
+              <span className="text-[11px] text-gray-600 line-through">{formatPrice(product.compare_price)}</span>
+            )}
+          </div>
+          <Link href={`/products/${product.id}`}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              className={`text-[11px] font-bold ${accent.text} border ${accent.ring} px-3 py-1.5 rounded-full flex items-center gap-1 hover:bg-white/5 transition-colors`}
+            >
+              View <ArrowRight className="w-3 h-3" />
+            </motion.button>
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 function BestsellersSection({ products }: { products: Product[] }) {
   if (!products.length) return null;
