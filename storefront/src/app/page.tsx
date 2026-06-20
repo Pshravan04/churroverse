@@ -27,11 +27,11 @@ const stagger = {
 
 // ── Category config (matches actual menu) ─────────────────────
 const CATEGORIES = [
-  { key: "churro", label: "Churro Planet", emoji: "🌀", desc: "Classic galactic churros — cinnamon-dusted, caramel-filled, every bite a supernova.", gradient: "from-orange-900/40 to-amber-900/20", glow: "rgba(234,88,12,0.3)" },
-  { key: "shake", label: "Nebula Drinks", emoji: "🥤", desc: "Thick, creamy milkshakes infused with cosmic flavors from across the universe.", gradient: "from-pink-900/40 to-purple-900/20", glow: "rgba(236,72,153,0.3)" },
-  { key: "iced-tea", label: "Iced Tea Nebula", emoji: "🧊", desc: "Refreshing iced teas brewed from rare leaves found on distant moons.", gradient: "from-amber-900/40 to-yellow-900/20", glow: "rgba(245,158,11,0.3)" },
-  { key: "waffle", label: "Waffle Planet", emoji: "🧇", desc: "Golden waffles with crispy constellations and sweet meteor showers.", gradient: "from-yellow-900/40 to-orange-900/20", glow: "rgba(251,191,36,0.3)" },
-  { key: "munchies", label: "Munchies Planet", emoji: "🍟", desc: "Savory cosmic snacks — perfect co-pilots for your flavor expedition.", gradient: "from-red-900/40 to-orange-900/20", glow: "rgba(220,38,38,0.3)" },
+  { key: "churro", label: "Churro Planet", emoji: "🌀", image: "/churro-hero.png", desc: "Classic galactic churros — cinnamon-dusted, caramel-filled, every bite a supernova.", gradient: "from-orange-900/40 to-amber-900/20", glow: "rgba(234,88,12,0.3)" },
+  { key: "shake", label: "Nebula Drinks", emoji: "🥤", image: "/categories/shake.png", desc: "Thick, creamy milkshakes infused with cosmic flavors from across the universe.", gradient: "from-pink-900/40 to-purple-900/20", glow: "rgba(236,72,153,0.3)" },
+  { key: "iced-tea", label: "Iced Tea Nebula", emoji: "🧊", image: "/categories/iced-tea.png", desc: "Refreshing iced teas brewed from rare leaves found on distant moons.", gradient: "from-amber-900/40 to-yellow-900/20", glow: "rgba(245,158,11,0.3)" },
+  { key: "waffle", label: "Waffle Planet", emoji: "🧇", image: "/categories/waffle.png", desc: "Golden waffles with crispy constellations and sweet meteor showers.", gradient: "from-yellow-900/40 to-orange-900/20", glow: "rgba(251,191,36,0.3)" },
+  { key: "munchies", label: "Munchies Planet", emoji: "🍟", image: "/categories/munchies.png", desc: "Savory cosmic snacks — perfect co-pilots for your flavor expedition.", gradient: "from-red-900/40 to-orange-900/20", glow: "rgba(220,38,38,0.3)" },
 ];
 
 const FEATURES = [
@@ -126,25 +126,25 @@ function FeaturedCarousel({ products }: { products: Product[] }) {
 
           if (isActive) {
             x = 0;
-            scale = 1.3;
+            scale = 1.6;
             opacity = 1;
             zIndex = 50;
             blur = "blur(0px)";
             rotateY = 0;
           } else if (isLeft) {
-            x = typeof window !== "undefined" && window.innerWidth < 1024 ? -120 : -350;
-            scale = 0.8;
-            opacity = 0.4;
+            x = typeof window !== "undefined" && window.innerWidth < 1024 ? -130 : -400;
+            scale = 0.85;
+            opacity = 0.3;
             zIndex = 40;
-            blur = "blur(4px)";
-            rotateY = 20;
+            blur = "blur(6px)";
+            rotateY = 25;
           } else if (isRight) {
-            x = typeof window !== "undefined" && window.innerWidth < 1024 ? 120 : 350;
-            scale = 0.8;
-            opacity = 0.4;
+            x = typeof window !== "undefined" && window.innerWidth < 1024 ? 130 : 400;
+            scale = 0.85;
+            opacity = 0.3;
             zIndex = 40;
-            blur = "blur(4px)";
-            rotateY = -20;
+            blur = "blur(6px)";
+            rotateY = -25;
           }
 
           return (
@@ -167,13 +167,18 @@ function FeaturedCarousel({ products }: { products: Product[] }) {
               }}
             >
               {p.images && p.images.length > 0 ? (
-                <motion.img 
-                  animate={isActive ? { y: [0, -15, 0], rotate: [0, 5, -5, 0] } : {}}
-                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  src={p.images[0]} 
-                  alt={p.name} 
-                  className="w-full h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]" 
-                />
+                <motion.div
+                  animate={isActive ? { y: [0, -20, 0], rotate: [-2, 2, -2] } : {}}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-full h-full"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={p.images[0]} 
+                    alt={p.name} 
+                    className={`w-full h-full object-contain filter ${isActive ? "drop-shadow-[0_40px_60px_rgba(0,0,0,0.9)]" : "drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"}`} 
+                  />
+                </motion.div>
               ) : (
                 <span className="text-[7rem] lg:text-[10rem]">{p.emoji}</span>
               )}
@@ -210,23 +215,23 @@ function FeaturedCarousel({ products }: { products: Product[] }) {
             </span>
           )}
           
-          <h3 className={`text-4xl lg:text-6xl font-black text-white leading-tight mb-4 tracking-tight`}>
+          <h3 className={`text-5xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 leading-tight mb-4 tracking-tighter drop-shadow-2xl`}>
             {activeProduct.name}
           </h3>
           
-          <p className="text-gray-300 text-base lg:text-lg mb-8 px-4">
+          <p className="text-gray-300 text-lg lg:text-xl mb-10 px-4 max-w-xl font-medium tracking-wide">
             {activeProduct.description}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-6 lg:gap-8">
-            <div className="flex flex-col items-center sm:items-start">
+          <div className="flex flex-col sm:flex-row items-center gap-8 lg:gap-12">
+            <div className="flex flex-col items-center sm:items-start bg-white/[0.03] px-6 py-3 rounded-3xl border border-white/5 backdrop-blur-md">
               {activeProduct.compare_price && (
                 <span className="text-sm text-gray-500 line-through mb-1">
                   {formatPrice(activeProduct.compare_price)}
                 </span>
               )}
               <div className="flex items-baseline gap-2">
-                <span className={`text-4xl lg:text-5xl font-black ${accent.text}`}>
+                <span className={`text-5xl lg:text-6xl font-black ${accent.text} drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]`}>
                   {formatPrice(activeProduct.price)}
                 </span>
               </div>
@@ -236,7 +241,7 @@ function FeaturedCarousel({ products }: { products: Product[] }) {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`flex items-center justify-center gap-3 bg-gradient-to-r ${accent.btn} text-white font-black px-8 py-4 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all`}
+                className={`flex items-center justify-center gap-3 bg-gradient-to-r ${accent.btn} text-white font-black px-10 py-5 rounded-full shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all text-lg`}
               >
                 <ShoppingCart className="w-5 h-5" /> Launch Mission
               </motion.button>
@@ -459,7 +464,11 @@ function HeroSection() {
               >
                 <div className="relative">
                   <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300">
-                    {p.emoji}
+                    {p.images && p.images.length > 0 ? (
+                      <img src={p.images[0]} alt={p.name} className="w-14 h-14 object-contain filter drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]" />
+                    ) : (
+                      p.emoji
+                    )}
                   </div>
                   <div className="absolute -inset-2 bg-orange-500/10 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
@@ -602,14 +611,15 @@ function CategoriesSection() {
                       <ArrowRight className="w-4 h-4 text-white" />
                     </motion.div>
                   </div>
-                  {/* Emoji */}
+                  {/* Image */}
                   <div className="relative z-10 flex items-center justify-center flex-1">
                     <motion.div
-                      animate={{ y: [0, -12, 0], rotate: [-3, 3, -3] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="text-[8rem] leading-none"
+                      animate={{ y: [0, -15, 0], rotate: [-3, 3, -3] }}
+                      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                      className="w-48 h-48 sm:w-64 sm:h-64 mt-4"
                     >
-                      {cat.emoji}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={cat.image} alt={cat.label} className="w-full h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]" />
                     </motion.div>
                   </div>
                   {/* Info */}
@@ -639,15 +649,16 @@ function CategoriesSection() {
                   <div className="absolute inset-0 pointer-events-none"
                     style={{ background: `radial-gradient(circle at 30% 50%, ${s.glow} 0%, transparent 65%)` }}
                   />
-                  {/* Emoji */}
-                  <div className="relative z-10 flex-shrink-0 w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center">
-                    <motion.span
-                      animate={{ rotate: [-2, 2, -2] }}
-                      transition={{ duration: 3 + i, repeat: Infinity }}
-                      className="text-3xl"
+                  {/* Image */}
+                  <div className="relative z-10 flex-shrink-0 w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center">
+                    <motion.div
+                      animate={{ y: [0, -6, 0], rotate: [-2, 2, -2] }}
+                      transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+                      className="w-16 h-16"
                     >
-                      {cat.emoji}
-                    </motion.span>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={cat.image} alt={cat.label} className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" />
+                    </motion.div>
                   </div>
                   {/* Info */}
                   <div className="relative z-10 flex-1 min-w-0">
