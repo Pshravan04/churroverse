@@ -72,49 +72,161 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
   );
 }
 
-function ProductCard({ product, index }: { product: Product; index: number }) {
+// Accent palettes per card index
+const CARD_ACCENTS = [
+  { glow: "rgba(234,88,12,0.35)",  ring: "border-orange-500/30",  tagBg: "bg-orange-600",     gradFrom: "from-orange-950/60",  gradTo: "to-red-950/40",    text: "text-orange-400",  btn: "from-orange-600 to-red-600" },
+  { glow: "rgba(168,85,247,0.35)", ring: "border-purple-500/30",  tagBg: "bg-purple-600",     gradFrom: "from-purple-950/60", gradTo: "to-indigo-950/40", text: "text-purple-400", btn: "from-purple-600 to-indigo-600" },
+  { glow: "rgba(245,158,11,0.35)", ring: "border-amber-500/30",   tagBg: "bg-amber-600",      gradFrom: "from-amber-950/60",  gradTo: "to-orange-950/40", text: "text-amber-400",  btn: "from-amber-600 to-orange-600" },
+];
+
+// Spotlight (large) card — left column
+function SpotlightCard({ product, accent }: { product: Product; accent: typeof CARD_ACCENTS[0] }) {
+  const savings = product.compare_price ? product.compare_price - product.price : 0;
   return (
     <motion.div
       variants={fadeUp}
-      custom={index * 0.08}
-      whileHover={{ y: -6 }}
-      className="group relative rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm overflow-hidden hover:border-orange-500/30 transition-all duration-300"
+      custom={0}
+      whileHover={{ scale: 1.01 }}
+      className={`group relative rounded-3xl border ${accent.ring} bg-white/[0.03] backdrop-blur-md overflow-hidden h-full flex flex-col transition-all duration-500`}
     >
+      {/* Animated background glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[80px]"
+          style={{ background: accent.glow }}
+        />
+        <div className={`absolute inset-0 bg-gradient-to-br ${accent.gradFrom} ${accent.gradTo} opacity-60`} />
+      </div>
+
+      {/* Tag */}
       {product.tag && (
-        <span className="absolute top-3 left-3 z-10 text-xs font-bold px-2.5 py-1 rounded-full bg-orange-600 text-white shadow">
-          {product.tag}
-        </span>
+        <div className="absolute top-4 left-4 z-10">
+          <span className={`${accent.tagBg} text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg`}>
+            {product.tag}
+          </span>
+        </div>
       )}
-      <Link href={`/products/${product.id}`}>
-        <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-gray-900 to-black overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-20 h-20 bg-orange-500/10 rounded-full blur-2xl group-hover:w-28 group-hover:h-28 group-hover:bg-orange-500/20 transition-all duration-500" />
-          </div>
-          <span className="text-5xl relative z-10">{product.emoji}</span>
-        </div>
+
+      {/* Emoji display */}
+      <Link href={`/products/${product.id}`} className="relative z-10 flex-1 flex items-center justify-center py-12 px-8">
+        <motion.div
+          animate={{ y: [0, -10, 0], rotate: [-2, 2, -2] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="text-[9rem] leading-none select-none filter drop-shadow-2xl"
+        >
+          {product.emoji}
+        </motion.div>
+        {/* Orbit ring */}
+        <div className={`absolute w-56 h-56 rounded-full border ${accent.ring} opacity-20 group-hover:opacity-40 transition-opacity duration-500`} />
+        <div className={`absolute w-40 h-40 rounded-full border ${accent.ring} opacity-10 group-hover:opacity-25 transition-opacity duration-500`} />
       </Link>
-      <div className="p-4">
-        <Link href={`/products/${product.id}`}>
-          <h3 className="font-bold text-white text-sm group-hover:text-orange-400 transition-colors leading-tight mb-1">
-            {product.name}
-          </h3>
-        </Link>
-        <p className="text-gray-500 text-xs mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
-        <div className="flex items-center gap-2 mb-3">
-          <StarRating rating={product.rating} />
-          <span className="text-gray-600 text-xs">({product.review_count})</span>
+
+      {/* Info panel */}
+      <div className="relative z-10 p-6 pt-4 space-y-4">
+        {/* Rating + reviews */}
+        <div className="flex items-center gap-2">
+          <StarRating rating={product.rating} size="md" />
+          <span className={`text-xs font-bold ${accent.text}`}>{product.rating}</span>
+          <span className="text-gray-600 text-xs">({product.review_count} reviews)</span>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-black text-orange-400">{formatPrice(product.price)}</span>
-            {product.compare_price && (
-              <span className="text-xs text-gray-600 line-through">{formatPrice(product.compare_price)}</span>
+
+        <div>
+          <Link href={`/products/${product.id}`}>
+            <h3 className={`text-2xl font-black text-white group-hover:${accent.text} transition-colors leading-tight`}>
+              {product.name}
+            </h3>
+          </Link>
+          <p className="text-gray-400 text-sm leading-relaxed mt-2">{product.description}</p>
+        </div>
+
+        {/* Price row */}
+        <div className="flex items-end justify-between pt-1">
+          <div>
+            <div className="flex items-baseline gap-2">
+              <span className={`text-3xl font-black ${accent.text}`}>{formatPrice(product.price)}</span>
+              {product.compare_price && (
+                <span className="text-sm text-gray-600 line-through">{formatPrice(product.compare_price)}</span>
+              )}
+            </div>
+            {savings > 0 && (
+              <span className="text-xs text-emerald-400 font-bold">Save {formatPrice(savings)}</span>
             )}
           </div>
           <Link href={`/products/${product.id}`}>
-            <Button size="sm" variant="ghost" className="text-xs text-gray-400 hover:text-white group/btn">
-              View <ArrowRight className="ml-1 w-3 h-3 inline group-hover/btn:translate-x-0.5 transition-transform" />
-            </Button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              className={`flex items-center gap-2 bg-gradient-to-r ${accent.btn} text-white font-bold text-sm px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-shadow`}
+            >
+              <ShoppingCart className="w-4 h-4" /> Order Now
+            </motion.button>
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// Compact card — right column stack
+function CompactFeaturedCard({ product, index, accent }: { product: Product; index: number; accent: typeof CARD_ACCENTS[0] }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      custom={index * 0.12}
+      whileHover={{ x: 6 }}
+      className={`group relative rounded-2xl border ${accent.ring} bg-white/[0.03] backdrop-blur-sm overflow-hidden flex items-stretch transition-all duration-300 hover:bg-white/[0.06]`}
+    >
+      <div className={`absolute inset-0 bg-gradient-to-r ${accent.gradFrom} ${accent.gradTo} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+
+      {/* Emoji side */}
+      <Link href={`/products/${product.id}`}
+        className="relative z-10 flex items-center justify-center w-28 flex-shrink-0 bg-white/[0.03]"
+      >
+        <div className="absolute inset-0" style={{ background: `radial-gradient(circle, ${accent.glow} 0%, transparent 70%)` }} />
+        <motion.span
+          animate={{ rotate: [-1, 1, -1] }}
+          transition={{ duration: 3 + index, repeat: Infinity }}
+          className="text-5xl relative z-10"
+        >
+          {product.emoji}
+        </motion.span>
+      </Link>
+
+      {/* Info side */}
+      <div className="relative z-10 flex-1 p-4 flex flex-col justify-between">
+        <div>
+          {product.tag && (
+            <span className={`${accent.tagBg} text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider mb-1.5 inline-block`}>
+              {product.tag}
+            </span>
+          )}
+          <Link href={`/products/${product.id}`}>
+            <h3 className={`font-black text-white text-base group-hover:${accent.text} transition-colors leading-tight`}>
+              {product.name}
+            </h3>
+          </Link>
+          <div className="flex items-center gap-1.5 mt-1">
+            <StarRating rating={product.rating} />
+            <span className="text-gray-600 text-[10px]">({product.review_count})</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-baseline gap-1.5">
+            <span className={`text-lg font-black ${accent.text}`}>{formatPrice(product.price)}</span>
+            {product.compare_price && (
+              <span className="text-[11px] text-gray-600 line-through">{formatPrice(product.compare_price)}</span>
+            )}
+          </div>
+          <Link href={`/products/${product.id}`}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              className={`text-[11px] font-bold ${accent.text} border ${accent.ring} px-3 py-1.5 rounded-full flex items-center gap-1 hover:bg-white/5 transition-colors`}
+            >
+              View <ArrowRight className="w-3 h-3" />
+            </motion.button>
           </Link>
         </div>
       </div>
@@ -368,22 +480,71 @@ function HeroSection() {
 
 function FeaturedSection({ products }: { products: Product[] }) {
   if (!products.length) return null;
+  const [p0, p1, p2] = products;
+  const a0 = CARD_ACCENTS[0], a1 = CARD_ACCENTS[1], a2 = CARD_ACCENTS[2];
+
   return (
-    <section className="w-full py-24 md:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-transparent pointer-events-none" />
+    <section className="w-full py-24 md:py-36 relative overflow-hidden">
+      {/* Cinematic background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020010] via-[#080415] to-[#020010]" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-orange-900/15 blur-[130px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-purple-900/15 blur-[130px]" />
+        {/* Subtle grid lines */}
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "60px 60px" }}
+        />
+      </div>
+
       <div className="relative z-10 container mx-auto px-4 max-w-7xl">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}
-          variants={stagger}
-        >
-          <SectionHeader subtitle="— Handcrafted in Zero Gravity —" title="Featured Flavors" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.slice(0, 3).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} variants={stagger}>
+
+          {/* Header */}
+          <motion.div variants={fadeUp} className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 text-orange-400/80 font-mono text-xs uppercase tracking-[0.3em] mb-4">
+              <span className="w-6 h-px bg-orange-400/50" />
+              Handcrafted in Zero Gravity
+              <span className="w-6 h-px bg-orange-400/50" />
+            </span>
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">
+              Featured{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-300 to-orange-500">Flavors</span>
+            </h2>
+            <p className="text-gray-500 mt-4 max-w-md mx-auto text-sm leading-relaxed">
+              Our most-loved churros — each one a journey through a different corner of the cosmos.
+            </p>
+          </motion.div>
+
+          {/* Bento grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5 min-h-[520px]">
+            {/* Left — spotlight */}
+            {p0 && <SpotlightCard product={p0} accent={a0} />}
+
+            {/* Right — two compact stacked */}
+            <div className="flex flex-col gap-5">
+              {p1 && <CompactFeaturedCard product={p1} index={1} accent={a1} />}
+              {p2 && <CompactFeaturedCard product={p2} index={2} accent={a2} />}
+            </div>
           </div>
-          <motion.div variants={fadeUp} className="text-center mt-10">
+
+          {/* CTA */}
+          <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 mt-12">
             <Link href="/products">
-              <Button variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10 group">
-                View All Capsules <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold px-8 py-4 rounded-full shadow-[0_0_30px_rgba(234,88,12,0.35)] hover:shadow-[0_0_50px_rgba(234,88,12,0.55)] transition-all"
+              >
+                <Sparkles className="w-4 h-4" /> View All Capsules
+              </motion.button>
+            </Link>
+            <Link href="/products?sort=rating">
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                className="flex items-center gap-2 border border-white/20 text-white font-bold px-8 py-4 rounded-full hover:bg-white/5 transition-all backdrop-blur-sm"
+              >
+                Top Rated <ArrowRight className="w-4 h-4" />
+              </motion.button>
             </Link>
           </motion.div>
         </motion.div>
