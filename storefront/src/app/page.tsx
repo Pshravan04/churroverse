@@ -45,7 +45,9 @@ const MOCK_FEATURED: Product[] = [
   { id: "m1", slug: "cosmic-churro", name: "Cosmic Churro Classic", description: "Cinnamon-dusted spirals, caramel-filled, lightly crispy.", long_desc: null, price: 24900, compare_price: null, category: "churro", emoji: "🌀", stock: 50, rating: 4.8, review_count: 312, tag: "Best Seller", featured: true, images: [], metadata: {}, created_at: "" },
   { id: "m2", slug: "dark-matter", name: "Dark Matter Chocolate", description: "Rich 70% dark chocolate ganache fused into every bite.", long_desc: null, price: 29900, compare_price: 34900, category: "churro", emoji: "🍫", stock: 40, rating: 4.9, review_count: 218, tag: "New Arrival", featured: true, images: [], metadata: {}, created_at: "" },
   { id: "m3", slug: "stardust-biscoff", name: "Stardust Biscoff", description: "Belgian Biscoff cream swirled through crunchy dough.", long_desc: null, price: 27900, compare_price: null, category: "churro", emoji: "⭐", stock: 35, rating: 4.7, review_count: 156, tag: "Fan Favorite", featured: true, images: [], metadata: {}, created_at: "" },
+  { id: "m8", slug: "supernova-matcha", name: "Supernova Matcha", description: "Japanese ceremonial matcha cream with white chocolate drizzle.", long_desc: null, price: 31900, compare_price: 36900, category: "churro", emoji: "🍵", stock: 20, rating: 4.9, review_count: 189, tag: "Limited", featured: true, images: [], metadata: {}, created_at: "" },
 ];
+
 
 const MOCK_BESTSELLERS: Product[] = [
   { id: "m4", slug: "nebula-nutella", name: "Nebula Nutella", description: "Hazelnut cocoa spread meets warm churro dough.", long_desc: null, price: 28900, compare_price: null, category: "churro", emoji: "🌌", stock: 30, rating: 4.9, review_count: 312, tag: null, featured: false, images: [], metadata: {}, created_at: "" },
@@ -480,8 +482,8 @@ function HeroSection() {
 
 function FeaturedSection({ products }: { products: Product[] }) {
   if (!products.length) return null;
-  const [p0, p1, p2] = products;
-  const a0 = CARD_ACCENTS[0], a1 = CARD_ACCENTS[1], a2 = CARD_ACCENTS[2];
+  const [p0, p1, p2, p3] = products;
+  const a0 = CARD_ACCENTS[0], a1 = CARD_ACCENTS[1], a2 = CARD_ACCENTS[2], a3 = CARD_ACCENTS[0];
 
   return (
     <section className="w-full py-24 md:py-36 relative overflow-hidden">
@@ -490,7 +492,6 @@ function FeaturedSection({ products }: { products: Product[] }) {
         <div className="absolute inset-0 bg-gradient-to-b from-[#020010] via-[#080415] to-[#020010]" />
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-orange-900/15 blur-[130px]" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-purple-900/15 blur-[130px]" />
-        {/* Subtle grid lines */}
         <div className="absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "60px 60px" }}
         />
@@ -515,15 +516,17 @@ function FeaturedSection({ products }: { products: Product[] }) {
             </p>
           </motion.div>
 
-          {/* Bento grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5 min-h-[520px]">
-            {/* Left — spotlight */}
-            {p0 && <SpotlightCard product={p0} accent={a0} />}
-
-            {/* Right — two compact stacked */}
+          {/* Bento grid — 2 columns, each with 1 spotlight + 1 compact */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Left column */}
             <div className="flex flex-col gap-5">
+              {p0 && <SpotlightCard product={p0} accent={a0} />}
               {p1 && <CompactFeaturedCard product={p1} index={1} accent={a1} />}
-              {p2 && <CompactFeaturedCard product={p2} index={2} accent={a2} />}
+            </div>
+            {/* Right column */}
+            <div className="flex flex-col gap-5">
+              {p2 && <SpotlightCard product={p2} accent={a2} />}
+              {p3 && <CompactFeaturedCard product={p3} index={3} accent={a3} />}
             </div>
           </div>
 
@@ -553,45 +556,157 @@ function FeaturedSection({ products }: { products: Product[] }) {
   );
 }
 
+
+// Category accent configs
+const CAT_STYLES = [
+  { bg: "from-orange-950 to-red-950",   glow: "rgba(234,88,12,0.5)",   border: "border-orange-500/30",  text: "text-orange-400",  badge: "bg-orange-600",  count: "12" },
+  { bg: "from-pink-950 to-purple-950",  glow: "rgba(236,72,153,0.5)",  border: "border-pink-500/30",   text: "text-pink-400",    badge: "bg-pink-600",    count: "8"  },
+  { bg: "from-amber-950 to-yellow-950", glow: "rgba(245,158,11,0.5)",  border: "border-amber-500/30",  text: "text-amber-400",  badge: "bg-amber-600",   count: "6"  },
+  { bg: "from-yellow-950 to-orange-950",glow: "rgba(251,191,36,0.5)",  border: "border-yellow-500/30", text: "text-yellow-400", badge: "bg-yellow-600",  count: "9"  },
+  { bg: "from-red-950 to-orange-950",   glow: "rgba(220,38,38,0.5)",   border: "border-red-500/30",    text: "text-red-400",    badge: "bg-red-600",     count: "10" },
+];
+
 function CategoriesSection() {
   return (
-    <section className="w-full py-24 md:py-32 bg-black relative overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[800px] h-[400px] rounded-full bg-indigo-900/20 blur-[120px]" />
+    <section className="w-full py-24 md:py-36 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020010] via-black to-[#020010]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[400px] rounded-full bg-indigo-900/15 blur-[150px]" />
       </div>
-      <div className="relative z-10 container mx-auto px-4 max-w-7xl">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}
-          variants={stagger}
-        >
-          <SectionHeader subtitle="— 5 Known Dimensions —" title="Explore the Universe" />
-          <motion.p variants={fadeUp} className="text-gray-500 text-center max-w-xl mx-auto mb-12 -mt-8">
-            Every flavor category is a distinct world. Pick your dimension and begin the journey.
-          </motion.p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {CATEGORIES.map((cat, i) => (
-              <motion.div key={cat.key} variants={fadeUp} custom={i * 0.08}
-                whileHover={{ y: -6, scale: 1.02 }}
-                className="group relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center overflow-hidden hover:border-orange-500/30 transition-all duration-300"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-b ${cat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                <div className="relative z-10">
-                  <div className="text-4xl mb-3">{cat.emoji}</div>
-                  <h3 className="font-bold text-white text-sm mb-2">{cat.label}</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">{cat.desc}</p>
-                  <Link href={`/products?category=${cat.key}`}
-                    className="absolute inset-0 rounded-2xl"
-                    aria-label={`Explore ${cat.label}`}
+      <div className="relative z-10 container mx-auto px-4 max-w-7xl">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} variants={stagger}>
+
+          {/* Header */}
+          <motion.div variants={fadeUp} className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 text-indigo-400/80 font-mono text-xs uppercase tracking-[0.3em] mb-4">
+              <span className="w-6 h-px bg-indigo-400/50" />
+              5 Known Dimensions
+              <span className="w-6 h-px bg-indigo-400/50" />
+            </span>
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">
+              Explore the{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">Universe</span>
+            </h2>
+            <p className="text-gray-500 mt-4 max-w-lg mx-auto text-sm leading-relaxed">
+              Every flavor category is a distinct cosmic world. Pick your dimension and begin the journey.
+            </p>
+          </motion.div>
+
+          {/* Category grid — large hero card + 4 smaller */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr] gap-5">
+
+            {/* Hero card — first category */}
+            {CATEGORIES.slice(0, 1).map((cat, i) => {
+              const s = CAT_STYLES[0];
+              return (
+                <motion.div key={cat.key} variants={fadeUp} custom={0}
+                  whileHover={{ scale: 1.02 }}
+                  className={`group relative rounded-3xl border ${s.border} bg-gradient-to-br ${s.bg} overflow-hidden md:row-span-2 flex flex-col justify-between min-h-[340px] cursor-pointer`}
+                >
+                  {/* Animated glow */}
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 5, repeat: Infinity }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 rounded-full blur-[80px] pointer-events-none"
+                    style={{ background: s.glow }}
                   />
-                </div>
-              </motion.div>
-            ))}
+                  {/* Count badge */}
+                  <div className="relative z-10 p-6 flex justify-between items-start">
+                    <span className={`${s.badge} text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest`}>
+                      {s.count} items
+                    </span>
+                    <motion.div whileHover={{ rotate: -45 }} className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center">
+                      <ArrowRight className="w-4 h-4 text-white" />
+                    </motion.div>
+                  </div>
+                  {/* Emoji */}
+                  <div className="relative z-10 flex items-center justify-center flex-1">
+                    <motion.div
+                      animate={{ y: [0, -12, 0], rotate: [-3, 3, -3] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="text-[8rem] leading-none"
+                    >
+                      {cat.emoji}
+                    </motion.div>
+                  </div>
+                  {/* Info */}
+                  <div className="relative z-10 p-6 pt-0">
+                    <h3 className={`font-black text-2xl text-white mb-1`}>{cat.label}</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-4">{cat.desc}</p>
+                    <Link href={`/products?category=${cat.key}`}
+                      className={`inline-flex items-center gap-2 ${s.text} font-bold text-sm border ${s.border} px-4 py-2 rounded-full hover:bg-white/5 transition-colors`}
+                    >
+                      Explore Dimension <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                  <Link href={`/products?category=${cat.key}`} className="absolute inset-0 rounded-3xl" aria-label={`Explore ${cat.label}`} />
+                </motion.div>
+              );
+            })}
+
+            {/* Smaller cards — remaining 4 categories */}
+            {CATEGORIES.slice(1).map((cat, i) => {
+              const s = CAT_STYLES[i + 1];
+              return (
+                <motion.div key={cat.key} variants={fadeUp} custom={(i + 1) * 0.08}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  className={`group relative rounded-2xl border ${s.border} bg-gradient-to-br ${s.bg} overflow-hidden p-5 flex items-center gap-4 cursor-pointer min-h-[145px]`}
+                >
+                  {/* Glow */}
+                  <div className="absolute inset-0 pointer-events-none"
+                    style={{ background: `radial-gradient(circle at 30% 50%, ${s.glow} 0%, transparent 65%)` }}
+                  />
+                  {/* Emoji */}
+                  <div className="relative z-10 flex-shrink-0 w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center">
+                    <motion.span
+                      animate={{ rotate: [-2, 2, -2] }}
+                      transition={{ duration: 3 + i, repeat: Infinity }}
+                      className="text-3xl"
+                    >
+                      {cat.emoji}
+                    </motion.span>
+                  </div>
+                  {/* Info */}
+                  <div className="relative z-10 flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`${s.badge} text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider`}>
+                        {s.count} items
+                      </span>
+                      <motion.div
+                        whileHover={{ x: 3 }}
+                        className={`${s.text} opacity-0 group-hover:opacity-100 transition-opacity`}
+                      >
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </motion.div>
+                    </div>
+                    <h3 className="font-black text-white text-base leading-tight">{cat.label}</h3>
+                    <p className="text-gray-500 text-xs leading-relaxed mt-0.5 line-clamp-2">{cat.desc}</p>
+                  </div>
+                  <Link href={`/products?category=${cat.key}`} className="absolute inset-0 rounded-2xl" aria-label={`Explore ${cat.label}`} />
+                </motion.div>
+              );
+            })}
           </div>
+
+          {/* Bottom CTA */}
+          <motion.div variants={fadeUp} className="text-center mt-12">
+            <Link href="/products">
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                className="inline-flex items-center gap-2 border border-indigo-500/30 text-indigo-300 font-bold px-8 py-4 rounded-full hover:bg-indigo-950/30 transition-all backdrop-blur-sm"
+              >
+                <Rocket className="w-4 h-4" /> Browse All Dimensions
+              </motion.button>
+            </Link>
+          </motion.div>
         </motion.div>
       </div>
     </section>
   );
 }
+
 
 function BestsellersSection({ products }: { products: Product[] }) {
   if (!products.length) return null;
