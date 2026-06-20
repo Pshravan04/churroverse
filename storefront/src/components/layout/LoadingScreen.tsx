@@ -121,131 +121,20 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
             />
           </div>
 
-          {/* ── Churro assembly ───────────────────────────── */}
-          <div className="relative flex items-center justify-center" style={{ width: 340, height: 340 }}>
-
-            {/* Orbit decoration ring */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{ border: "1px dashed rgba(234,88,12,0.2)" }}
+          {/* ── 3D Churro Canvas ───────────────────────────── */}
+          <div className="absolute inset-0 z-10" style={{ filter: "drop-shadow(0 10px 30px rgba(234,88,12,0.3))" }}>
+            <LoadingCanvas
+              progress={progress}
+              onBreakStart={() => setShowRing(true)}
+              onDone={() => {
+                setPhase("reveal");
+                timerRef.current = setTimeout(() => {
+                  setPhase("done");
+                  onComplete();
+                }, 900);
+              }}
             />
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              className="absolute rounded-full pointer-events-none"
-              style={{ inset: 20, border: "1px dashed rgba(251,191,36,0.12)" }}
-            />
-
-            {/* ── TOP HALF of churro (clip top 50%) ─────── */}
-            <motion.div
-              className="absolute"
-              style={{ zIndex: 10 }}
-              /* Drop from top */
-              initial={{ y: -520, rotate: -8, opacity: 0 }}
-              animate={
-                phase === "drop" ? { y: 0, rotate: 0, opacity: 1 } :
-                phase === "float" ? { y: [0, -6, 0], rotate: 0, opacity: 1 } :
-                phase === "crack" ? { y: 0, rotate: 0, opacity: 1 } :
-                phase === "shatter" ? { y: -380, rotate: -22, opacity: 0 } :
-                { y: -380, opacity: 0 }
-              }
-              transition={
-                phase === "drop" ? { duration: 1.1, ease: [0.22, 1, 0.36, 1], onComplete: handleDropEnd } :
-                phase === "float" ? { duration: 2.8, repeat: Infinity, ease: "easeInOut" } :
-                phase === "shatter" ? { duration: 0.7, ease: [0.4, 0, 0.6, 1] } :
-                {}
-              }
-            >
-              <div
-                style={{
-                  width: 280,
-                  height: 120,
-                  overflow: "hidden",
-                  clipPath: "inset(0 0 0 0)",
-                  filter: "drop-shadow(0 -8px 24px rgba(234,88,12,0.5))",
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/single-churro.webp"
-                  alt="churro top half"
-                  style={{
-                    width: 280,
-                    height: 240,
-                    objectFit: "cover",
-                    objectPosition: "center top",
-                    display: "block",
-                  }}
-                />
-              </div>
-            </motion.div>
-
-            {/* ── BOTTOM HALF of churro (clip bottom 50%) ── */}
-            <motion.div
-              className="absolute"
-              style={{ zIndex: 10 }}
-              initial={{ y: -520, rotate: 8, opacity: 0 }}
-              animate={
-                phase === "drop" ? { y: 0, rotate: 0, opacity: 1 } :
-                phase === "float" ? { y: [0, -6, 0], rotate: 0, opacity: 1 } :
-                phase === "crack" ? { y: 0, rotate: 0, opacity: 1 } :
-                phase === "shatter" ? { y: 400, rotate: 18, opacity: 0 } :
-                { y: 400, opacity: 0 }
-              }
-              transition={
-                phase === "drop" ? { duration: 1.1, ease: [0.22, 1, 0.36, 1] } :
-                phase === "float" ? { duration: 2.8, repeat: Infinity, ease: "easeInOut" } :
-                phase === "shatter" ? { duration: 0.7, ease: [0.4, 0, 0.6, 1] } :
-                {}
-              }
-            >
-              <div
-                style={{
-                  width: 280,
-                  height: 120,
-                  overflow: "hidden",
-                  clipPath: "inset(0 0 0 0)",
-                  filter: "drop-shadow(0 8px 24px rgba(234,88,12,0.5))",
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/single-churro.webp"
-                  alt="churro bottom half"
-                  style={{
-                    width: 280,
-                    height: 240,
-                    objectFit: "cover",
-                    objectPosition: "center bottom",
-                    display: "block",
-                  }}
-                />
-              </div>
-            </motion.div>
-
-            {/* ── Fracture glow line ─────────────────────── */}
-            <AnimatePresence>
-              {phase === "crack" && (
-                <motion.div
-                  key="crack"
-                  initial={{ scaleX: 0, opacity: 0 }}
-                  animate={{ scaleX: 1, opacity: [0, 1, 0.6, 1] }}
-                  exit={{ opacity: 0, scaleY: 3 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="absolute"
-                  style={{
-                    width: 300,
-                    height: 3,
-                    background: "linear-gradient(90deg, transparent, #fbbf24, #f97316, #fbbf24, transparent)",
-                    boxShadow: "0 0 20px 6px rgba(251,191,36,0.8), 0 0 60px 20px rgba(234,88,12,0.5)",
-                    borderRadius: 4,
-                    zIndex: 20,
-                  }}
-                />
-              )}
-            </AnimatePresence>
+          </div>
 
             {/* ── Shockwave ring ─────────────────────────── */}
             <AnimatePresence>

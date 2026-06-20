@@ -5,9 +5,11 @@ import ChurroLoader from './ChurroLoader';
 
 export default function LoadingCanvas({
   progress,
+  onBreakStart,
   onDone,
 }: {
   progress: number;
+  onBreakStart?: () => void;
   onDone: () => void;
 }) {
   return (
@@ -19,7 +21,7 @@ export default function LoadingCanvas({
     >
       <ChurroLoader
         progress={progress}
-        onBreakStart={() => {}}
+        onBreakStart={onBreakStart || (() => {})}
         onDone={onDone}
       />
     </Canvas>
