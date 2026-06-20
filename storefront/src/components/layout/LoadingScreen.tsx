@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useAnimate } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const LoadingCanvas = dynamic(() => import("@/components/3d/LoadingCanvas"), { ssr: false });
 
 /* ─── deterministic particles (no hydration mismatch) ─────────── */
 function det(seed: number, i: number) {
