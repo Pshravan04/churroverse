@@ -1,15 +1,45 @@
 import * as THREE from 'three';
 
 const RIDGES = 8;
-const OUTER_R = 0.5;
-const INNER_R = 0.3;
-const HALF_LENGTH = 1.25;
-const SEGMENTS_PER_HALF = 28;
+const OUTER_R = 0.45;
+const INNER_R = 0.26;
+const HALF_LENGTH = 1.4;
+const SEGMENTS_PER_HALF = 32;
 const S = RIDGES * 2;
-const DIP_FRACTION = 0.35;
-const DIP_SCALE = 1.04;
+const DIP_FRACTION = 0.32;
+const DIP_SCALE = 1.05;
 const WAVE_AMP = 0.1;
 const WAVE_FREQ = 5;
+
+function det(i: number): number {
+  const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function ridgeColor(i: number): [number, number, number] {
+  const r = 0.56 + det(i) * 0.04;
+  const g = 0.34 + det(i + 3) * 0.04;
+  const b = 0.16 + det(i + 7) * 0.03;
+  return [r, g, b];
+}
+
+function valleyColor(i: number): [number, number, number] {
+  const r = 0.80 + det(i) * 0.04;
+  const g = 0.62 + det(i + 3) * 0.04;
+  const b = 0.30 + det(i + 7) * 0.03;
+  return [r, g, b];
+}
+
+function capCenterColor(): [number, number, number] {
+  return [0.62, 0.38, 0.18];
+}
+
+function dipColor(i: number): [number, number, number] {
+  const r = 0.17 + det(i) * 0.04;
+  const g = 0.06 + det(i + 3) * 0.03;
+  const b = 0.02 + det(i + 7) * 0.02;
+  return [r, g, b];
+}
 
 function starPoints(outer = OUTER_R, inner = INNER_R): [number, number][] {
   const pts: [number, number][] = [];
@@ -23,8 +53,9 @@ function starPoints(outer = OUTER_R, inner = INNER_R): [number, number][] {
 }
 
 function writeSection(
-  pos: number[], norm: number[], uv: number[],
+  pos: number[], norm: number[], uv: number[], col: number[],
   star: [number, number][], x: number, t: number,
+  isDip = false,
 ) {
   for (let i = 0; i < S; i++) {
     const [y, z] = star[i];
@@ -32,6 +63,14 @@ function writeSection(
     const len = Math.hypot(y, z);
     norm.push(0, y / len, z / len);
     uv.push(t, i / S);
+    if (isDip) {
+      const c = dipColor(i);
+      col.push(c[0], c[1], c[2]);
+    } else {
+      const isRidge = i % 2 === 0;
+      const c = isRidge ? ridgeColor(i) : valleyColor(i);
+      col.push(c[0], c[1], c[2]);
+    }
   }
 }
 
@@ -44,13 +83,16 @@ function writeQuads(idx: number[], rowA: number, rowB: number) {
 }
 
 function writeCap(
-  idx: number[], pos: number[], norm: number[], uv: number[],
+  idx: number[], pos: number[], norm: number[], uv: number[], col: number[],
   star: [number, number][], x: number, reverse: boolean, sectionStart: number,
+  isDip = false,
 ) {
   const center = pos.length / 3;
   pos.push(x, 0, 0);
   norm.push(reverse ? -1 : 1, 0, 0);
   uv.push(0.5, 0.5);
+  const cc = isDip ? dipColor(0) : capCenterColor();
+  col.push(cc[0], cc[1], cc[2]);
   for (let i = 0; i < S; i++) {
     const ni = (i + 1) % S;
     if (reverse) {
@@ -66,6 +108,7 @@ function buildHalfBody(side: 'left' | 'right'): THREE.BufferGeometry {
   const pos: number[] = [];
   const norm: number[] = [];
   const uv: number[] = [];
+  const col: number[] = [];
   const idx: number[] = [];
 
   const xStart = side === 'left' ? -HALF_LENGTH : 0;
@@ -75,25 +118,21 @@ function buildHalfBody(side: 'left' | 'right'): THREE.BufferGeometry {
   for (let s = 0; s <= segs; s++) {
     const t = s / segs;
     const x = xStart + t * (xEnd - xStart);
-    writeSection(pos, norm, uv, star, x, t);
+    writeSection(pos, norm, uv, col, star, x, t, false);
   }
 
   for (let s = 0; s < segs; s++) {
     writeQuads(idx, s * S, (s + 1) * S);
   }
 
-  if (side === 'left') {
-    writeCap(idx, pos, norm, uv, star, xStart, true, 0);
-    writeCap(idx, pos, norm, uv, star, xEnd, false, segs * S);
-  } else {
-    writeCap(idx, pos, norm, uv, star, xStart, true, 0);
-    writeCap(idx, pos, norm, uv, star, xEnd, false, segs * S);
-  }
+  writeCap(idx, pos, norm, uv, col, star, xStart, true, 0, false);
+  writeCap(idx, pos, norm, uv, col, star, xEnd, false, segs * S, false);
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   geo.setAttribute('normal', new THREE.Float32BufferAttribute(norm, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
   geo.setIndex(idx);
   return geo;
 }
@@ -103,6 +142,7 @@ function buildDip(): THREE.BufferGeometry {
   const pos: number[] = [];
   const norm: number[] = [];
   const uv: number[] = [];
+  const col: number[] = [];
   const idx: number[] = [];
 
   const dipEnd = HALF_LENGTH;
@@ -122,6 +162,8 @@ function buildDip(): THREE.BufferGeometry {
       const len = Math.hypot(y, z);
       norm.push(0, y / len, z / len);
       uv.push(t, i / S);
+      const c = dipColor(i);
+      col.push(c[0], c[1], c[2]);
     }
   }
 
@@ -134,12 +176,13 @@ function buildDip(): THREE.BufferGeometry {
   }
 
   const rightRow = dipSegs * S;
-  writeCap(idx, pos, norm, uv, star, dipEnd, false, rightRow);
+  writeCap(idx, pos, norm, uv, col, star, dipEnd, false, rightRow, true);
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   geo.setAttribute('normal', new THREE.Float32BufferAttribute(norm, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
   geo.setIndex(idx);
   return geo;
 }
@@ -156,4 +199,27 @@ export function createChurroGeometries(): ChurroGeometries {
     rightBody: buildHalfBody('right'),
     dip: buildDip(),
   };
+}
+
+export function generateSugarGrainPositions(
+  _halfLength: number,
+  star: [number, number][],
+  count: number,
+): Float32Array {
+  const positions = new Float32Array(count * 3);
+  const scales = new Float32Array(count);
+  for (let g = 0; g < count; g++) {
+    const x = (Math.random() - 0.5) * _halfLength * 2;
+    const angle = Math.random() * Math.PI;
+    const rIdx = Math.floor((angle / Math.PI) * S) % S;
+    const pt = star[rIdx];
+    const r = Math.hypot(pt[0], pt[1]);
+    const y = ((Math.cos(angle) * OUTER_R + Math.cos(angle + Math.PI / (RIDGES * 2)) * INNER_R) / 2) * 1.06;
+    const z = ((Math.sin(angle) * OUTER_R + Math.sin(angle + Math.PI / (RIDGES * 2)) * INNER_R) / 2) * 1.06;
+    positions[g * 3] = x;
+    positions[g * 3 + 1] = y;
+    positions[g * 3 + 2] = z;
+    scales[g] = 0.015 + Math.random() * 0.025;
+  }
+  return positions;
 }
