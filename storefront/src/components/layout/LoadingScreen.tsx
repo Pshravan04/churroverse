@@ -121,20 +121,37 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
             />
           </div>
 
-          {/* ── 3D Churro Canvas ───────────────────────────── */}
-          <div className="absolute inset-0 z-10" style={{ filter: "drop-shadow(0 10px 30px rgba(234,88,12,0.3))" }}>
-            <LoadingCanvas
-              progress={progress}
-              onBreakStart={() => setShowRing(true)}
-              onDone={() => {
-                setPhase("reveal");
-                timerRef.current = setTimeout(() => {
-                  setPhase("done");
-                  onComplete();
-                }, 900);
-              }}
+          {/* ── Churro Wrapper ───────────────────────────── */}
+          <div className="relative flex items-center justify-center" style={{ width: 340, height: 340 }}>
+
+            {/* Orbit decoration rings */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{ border: "1px dashed rgba(234,88,12,0.2)" }}
             />
-          </div>
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+              className="absolute rounded-full pointer-events-none"
+              style={{ inset: 20, border: "1px dashed rgba(251,191,36,0.12)" }}
+            />
+
+            {/* ── 3D Churro Canvas ───────────────────────────── */}
+            <div className="absolute inset-0 z-10" style={{ filter: "drop-shadow(0 10px 30px rgba(234,88,12,0.3))" }}>
+              <LoadingCanvas
+                progress={progress}
+                onBreakStart={() => setShowRing(true)}
+                onDone={() => {
+                  setPhase("reveal");
+                  timerRef.current = setTimeout(() => {
+                    setPhase("done");
+                    onComplete();
+                  }, 900);
+                }}
+              />
+            </div>
 
             {/* ── Shockwave ring ─────────────────────────── */}
             <AnimatePresence>
