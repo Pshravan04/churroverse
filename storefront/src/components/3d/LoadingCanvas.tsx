@@ -27,7 +27,7 @@ export default function LoadingCanvas({
         onPhaseChange={onPhaseChange}
       />
 
-      <EffectComposer disableNormalPass>
+      <EffectComposer>
         <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} height={480} />
         <Bloom 
           luminanceThreshold={0.5} 
