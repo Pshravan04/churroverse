@@ -2,8 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 
-// Deterministic pseudo-random based on seed + index (matches SSR ↔ client)
+const LoadingCanvas = dynamic(
+  () => import("@/components/3d/LoadingCanvas"),
+  { ssr: false }
+);
+
 function detRandom(seed: number, i: number): number {
   const x = Math.sin(seed * 127.1 + i * 311.7) * 43758.5453123;
   return x - Math.floor(x);
@@ -29,33 +34,35 @@ const particles = makeParticles(60);
 export default function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<"loading" | "portal" | "done">("loading");
+  const [churroDone, setChurroDone] = useState(false);
 
   useEffect(() => {
-    // Simulate loading progress
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
-          setTimeout(() => setPhase("portal"), 200);
           return 100;
         }
         return prev + Math.random() * 8 + 2;
       });
     }, 80);
-
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     if (phase === "portal") {
-      // Hold portal animation then dismiss
       const t = setTimeout(() => {
         setPhase("done");
         setTimeout(onComplete, 600);
-      }, 1400);
+      }, 1200);
       return () => clearTimeout(t);
     }
   }, [phase, onComplete]);
+
+  const handleChurroDone = () => {
+    setChurroDone(true);
+    setTimeout(() => setPhase("portal"), 300);
+  };
 
   const messages = [
     "Fueling the Churro Engine...",
@@ -77,8 +84,18 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
           transition={{ duration: 0.6 }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#020010] overflow-hidden"
         >
+          {/* 3D Churro Canvas */}
+          {phase === "loading" && (
+            <div className="absolute inset-0 z-0">
+              <LoadingCanvas
+                progress={progress}
+                onDone={handleChurroDone}
+              />
+            </div>
+          )}
+
           {/* Deep-space particle background */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
             {particles.map((p, i) => (
               <motion.div
                 key={i}
@@ -97,59 +114,23 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                 key="portal"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: [0, 1.5, 15], opacity: [0, 1, 0] }}
-                transition={{ duration: 1.3, ease: "easeIn" }}
-                className="absolute inset-0 flex items-center justify-center"
+                transition={{ duration: 1.1, ease: "easeIn" }}
+                className="absolute inset-0 flex items-center justify-center z-[2]"
               >
                 <div className="w-40 h-40 rounded-full border-4 border-orange-500 shadow-[0_0_80px_rgba(234,88,12,0.8),inset_0_0_40px_rgba(234,88,12,0.4)]" />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Main content */}
+          {/* Overlay UI */}
           <AnimatePresence>
             {phase === "loading" && (
               <motion.div
                 key="content"
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.4 }}
-                className="relative z-10 flex flex-col items-center gap-10"
+                className="relative z-10 flex flex-col items-center gap-10 mt-[280px]"
               >
-                {/* Churro planet spinner */}
-                <div className="relative w-40 h-40">
-                  {/* Outer glow ring */}
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0 rounded-full border-2 border-orange-500/30"
-                    style={{
-                      boxShadow: "0 0 20px rgba(234,88,12,0.3)",
-                    }}
-                  />
-                  <motion.div
-                    animate={{ rotate: -360 }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-2 rounded-full border border-yellow-500/20"
-                  />
-                  {/* Churro planet orb */}
-                  <div className="absolute inset-6 rounded-full bg-gradient-to-br from-yellow-500 via-orange-600 to-red-700 shadow-[0_0_40px_rgba(234,88,12,0.6)] flex items-center justify-center">
-                    <motion.span
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="text-4xl"
-                    >
-                      🌀
-                    </motion.span>
-                  </div>
-                  {/* Orbiting particle */}
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0"
-                  >
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(234,88,12,1)]" />
-                  </motion.div>
-                </div>
-
                 {/* Branding */}
                 <div className="text-center">
                   <motion.h1
