@@ -5,6 +5,7 @@ import "./globals.css";
 import GlobalCanvas from "@/components/3d/GlobalCanvas";
 import Header from "@/components/layout/Header";
 import AppShell from "@/components/layout/AppShell";
+import CustomCursor from "@/components/ui/CustomCursor";
 import { ClerkProvider } from "@clerk/nextjs";
 
 const outfit = Outfit({
@@ -44,6 +45,7 @@ export default function RootLayout({
           className="min-h-full flex flex-col bg-[#020010] text-white overflow-x-hidden"
           suppressHydrationWarning
         >
+          <CustomCursor />
           <GlobalCanvas />
           <AppShell>
             <Header />
