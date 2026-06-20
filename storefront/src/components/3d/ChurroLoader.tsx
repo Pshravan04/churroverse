@@ -1,330 +1,297 @@
 'use client';
 
 import { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createChurroGeometries } from '@/lib/churro-geometry';
+import { createChurroGeometries, generateSugarGrainPositions } from '@/lib/churro-geometry';
 
-const RIDGES = 8;
-const S = RIDGES * 2;
-const GRAIN_COUNT = 600;
-const CHURRO_LENGTH = 2.8;
-const OUTER_R = 0.45;
-const INNER_R = 0.26;
+const CHURRO_LENGTH = 3.2;
+const GRAIN_COUNT_PER_HALF = 800;
 
-type Phase = 'enter' | 'float' | 'break' | 'fall' | 'done';
+export type LoaderPhase = 'descend' | 'macro' | 'tremor' | 'snap' | 'portal' | 'done';
 
-/* ── Realistic Bump Map for Fried Dough ── */
-function makeDoughBumpTexture(): THREE.Texture {
-  if (typeof document === 'undefined') return new THREE.Texture();
-  const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 512;
-  const ctx = canvas.getContext('2d')!;
-  const imgData = ctx.createImageData(512, 512);
-  for (let i = 0; i < imgData.data.length; i += 4) {
-    // fine grain noise
-    const val = 128 + (Math.random() - 0.5) * 120;
-    imgData.data[i] = val;
-    imgData.data[i+1] = val;
-    imgData.data[i+2] = val;
-    imgData.data[i+3] = 255;
-  }
-  ctx.putImageData(imgData, 0, 0);
-  const t = new THREE.CanvasTexture(canvas);
-  t.wrapS = THREE.RepeatWrapping;
-  t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(6, 2);
-  return t;
-}
-
-/* ── Realistic Sugar Crystals ── */
-function makeSugarTexture(): THREE.Texture {
-  if (typeof document === 'undefined') return new THREE.Texture();
-  const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
-  const ctx = canvas.getContext('2d')!;
-  const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.3, 'rgba(255, 248, 230, 0.9)');
-  gradient.addColorStop(0.7, 'rgba(255, 248, 230, 0.4)');
-  gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 32, 32);
-  const t = new THREE.CanvasTexture(canvas);
-  t.needsUpdate = true;
-  return t;
-}
-
-function generateGrainPositions(half: 'left' | 'right', halfLen: number): Float32Array {
-  const pos = new Float32Array(GRAIN_COUNT * 3);
-  const xStart = half === 'left' ? -halfLen : 0;
-  const xEnd = half === 'left' ? 0 : halfLen;
-  for (let i = 0; i < GRAIN_COUNT; i++) {
-    const x = xStart + Math.random() * (xEnd - xStart);
-    const angle = Math.random() * Math.PI * 2;
-    const isRidge = Math.random() > 0.4;
-    const r = isRidge ? OUTER_R : INNER_R;
-    const scale = 0.95 + Math.random() * 0.1;
-    pos[i * 3] = x;
-    pos[i * 3 + 1] = Math.cos(angle) * r * scale;
-    pos[i * 3 + 2] = Math.sin(angle) * r * scale;
-  }
-  return pos;
-}
-
-function GrainPoints({ positions, texture }: { positions: Float32Array; texture: THREE.Texture }) {
-  const geo = useMemo(() => {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    return g;
-  }, [positions]);
+function SugarCrystals({ positions, scales }: { positions: Float32Array; scales: Float32Array }) {
+  const count = scales.length;
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  
+  // Use a tiny icosahedron as a sugar crystal
+  const geo = useMemo(() => new THREE.IcosahedronGeometry(1, 0), []);
+  
+  useEffect(() => {
+    if (!meshRef.current) return;
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < count; i++) {
+      dummy.position.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+      const s = scales[i];
+      dummy.scale.set(s, s, s);
+      // Random rotation
+      dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [count, positions, scales]);
 
   return (
-    <points geometry={geo}>
-      <pointsMaterial
-        map={texture}
-        size={0.035}
-        sizeAttenuation
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-        opacity={0.8}
-        color="#ffffff"
+    <instancedMesh ref={meshRef} args={[geo, undefined, count]} castShadow receiveShadow>
+      <meshStandardMaterial 
+        color="#ffffff" 
+        roughness={0.1} 
+        metalness={0.1}
+        envMapIntensity={2.5}
+        transparent={true}
+        opacity={0.9}
       />
-    </points>
+    </instancedMesh>
   );
 }
 
 export default function ChurroLoader({
   progress,
-  onBreakStart,
-  onDone,
+  onPhaseChange,
 }: {
   progress: number;
-  onBreakStart: () => void;
-  onDone: () => void;
+  onPhaseChange: (phase: LoaderPhase) => void;
 }) {
+  const { pointer, camera } = useThree();
   const groupRef = useRef<THREE.Group>(null);
   const leftRef = useRef<THREE.Group>(null);
   const rightRef = useRef<THREE.Group>(null);
-  const glowRef = useRef<THREE.PointLight>(null);
-  const phaseRef = useRef<Phase>('enter');
-  const breakStartRef = useRef(0);
-  const fallStartRef = useRef(0);
-
+  const portalLightRef = useRef<THREE.PointLight>(null);
+  
+  const phaseRef = useRef<LoaderPhase>('descend');
+  const phaseStartTime = useRef(0);
+  
+  // Geometries
   const geoms = useMemo(() => createChurroGeometries(), []);
-  const sugarTexture = useMemo(() => makeSugarTexture(), []);
-  const bumpTexture = useMemo(() => makeDoughBumpTexture(), []);
-  const leftGrainPos = useMemo(() => generateGrainPositions('left', CHURRO_LENGTH / 2), []);
-  const rightGrainPos = useMemo(() => generateGrainPositions('right', CHURRO_LENGTH / 2), []);
+  const leftGrains = useMemo(() => generateSugarGrainPositions(CHURRO_LENGTH / 2, GRAIN_COUNT_PER_HALF, 'left'), []);
+  const rightGrains = useMemo(() => generateSugarGrainPositions(CHURRO_LENGTH / 2, GRAIN_COUNT_PER_HALF, 'right'), []);
 
-  const particleCount = 80;
-  const particlePositions = useMemo(() => {
-    const pos = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-      const r = 0.05 + Math.random() * 0.2;
-      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      pos[i * 3 + 2] = r * Math.cos(phi);
+  // Physics Particles (Crumbs)
+  const crumbCount = 150;
+  const crumbsRef = useRef<THREE.InstancedMesh>(null);
+  const crumbGeo = useMemo(() => new THREE.DodecahedronGeometry(0.04, 0), []);
+  const crumbPhysics = useMemo(() => {
+    return Array.from({ length: crumbCount }, () => ({
+      pos: new THREE.Vector3((Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4),
+      vel: new THREE.Vector3((Math.random() - 0.5) * 8, Math.random() * 8 - 2, (Math.random() - 0.5) * 8),
+      rot: new THREE.Vector3(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI),
+      rotVel: new THREE.Vector3(Math.random() * 10, Math.random() * 10, Math.random() * 10),
+      scale: 0.2 + Math.random() * 0.8
+    }));
+  }, [crumbCount]);
+
+  // Noise texture for bump mapping
+  const bumpMap = useMemo(() => {
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d')!;
+    const imgData = ctx.createImageData(512, 512);
+    for (let i = 0; i < imgData.data.length; i += 4) {
+      const val = 100 + Math.random() * 155; // high frequency noise
+      imgData.data[i] = val;
+      imgData.data[i+1] = val;
+      imgData.data[i+2] = val;
+      imgData.data[i+3] = 255;
     }
-    return pos;
+    ctx.putImageData(imgData, 0, 0);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(4, 4);
+    return tex;
   }, []);
 
-  const particleVelocities = useMemo(() => {
-    return Array.from({ length: particleCount }, () => {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-      const speed = 3 + Math.random() * 6;
-      return new THREE.Vector3(
-        Math.sin(phi) * Math.cos(theta) * speed,
-        Math.sin(phi) * Math.sin(theta) * speed + 2.5,
-        Math.cos(phi) * speed,
-      );
-    });
-  }, []);
-
-  const particlesRef = useRef<THREE.Points>(null);
+  const material = useMemo(() => new THREE.MeshPhysicalMaterial({
+    vertexColors: true,
+    roughness: 0.65,
+    metalness: 0.1,
+    clearcoat: 0.3,
+    clearcoatRoughness: 0.4,
+    bumpMap: bumpMap,
+    bumpScale: 0.02,
+    envMapIntensity: 1.2
+  }), [bumpMap]);
 
   useFrame((state, delta) => {
     const elapsed = state.clock.elapsedTime;
     const currentPhase = phaseRef.current;
+    
+    // Interactive subtle tilt based on mouse pointer
+    if (groupRef.current && (currentPhase === 'descend' || currentPhase === 'macro' || currentPhase === 'tremor')) {
+      const targetRotX = pointer.y * 0.15;
+      const targetRotY = pointer.x * 0.15;
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetRotX, delta * 3);
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, delta * 3);
+    }
 
-    if (currentPhase === 'enter') {
-      const enterT = Math.min(progress / 65, 1);
-      const eased = 1 - Math.pow(1 - enterT, 3);
-      const y = 8 * (1 - eased);
+    // --- STAGE 1 & 2: Descend ---
+    if (currentPhase === 'descend') {
+      const descendT = Math.min(progress / 30, 1);
+      const ease = 1 - Math.pow(1 - descendT, 3);
+      
       if (groupRef.current) {
-        groupRef.current.position.y = y;
-        groupRef.current.rotation.x += delta * 0.4 * eased;
-        groupRef.current.rotation.y += delta * 0.7 * eased;
-        groupRef.current.rotation.z += delta * 0.15 * eased;
+        groupRef.current.position.y = 8 * (1 - ease);
+        groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, 0.1, delta);
       }
-      if (enterT >= 1 && phaseRef.current === 'enter') {
-        phaseRef.current = 'float';
+      
+      // Update camera FOV slowly
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, 6, delta * 2);
+
+      if (descendT >= 1 && phaseRef.current === 'descend') {
+        phaseRef.current = 'macro';
+        phaseStartTime.current = elapsed;
+        onPhaseChange('macro');
       }
     }
 
-    if (currentPhase === 'float') {
+    // --- STAGE 3 & 4: Macro Close-up & Wait ---
+    if (currentPhase === 'macro') {
+      // Slow floaty rotation
       if (groupRef.current) {
-        groupRef.current.position.y = Math.sin(elapsed * 1.5) * 0.1;
-        groupRef.current.rotation.y += delta * 0.5;
-        groupRef.current.rotation.z = Math.sin(elapsed * 0.8) * 0.05;
+        groupRef.current.position.y = Math.sin(elapsed * 2) * 0.05;
+        groupRef.current.rotation.z = Math.sin(elapsed * 1.2) * 0.05 + 0.1;
       }
-      if (progress >= 100 && phaseRef.current === 'float') {
-        phaseRef.current = 'break';
-        breakStartRef.current = elapsed;
-        onBreakStart();
+      
+      // Zoom camera in for macro detail
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, 3.5, delta * 1.5);
+
+      if (progress >= 80 && phaseRef.current === 'macro') {
+        phaseRef.current = 'tremor';
+        phaseStartTime.current = elapsed;
+        onPhaseChange('tremor');
       }
     }
 
-    if (currentPhase === 'break') {
-      const breakT = Math.min((elapsed - breakStartRef.current) / 0.8, 1);
-      const eased = 1 - Math.pow(1 - breakT, 2);
-      const offset = eased * 2.8;
+    // --- STAGE 5: Tremor ---
+    if (currentPhase === 'tremor') {
+      const tremorElapsed = elapsed - phaseStartTime.current;
+      const intensity = Math.min(tremorElapsed / 1.5, 1); // builds up over 1.5s
+      
+      if (groupRef.current) {
+        groupRef.current.position.x = (Math.random() - 0.5) * 0.08 * intensity;
+        groupRef.current.position.y = (Math.random() - 0.5) * 0.08 * intensity;
+      }
+
+      if (portalLightRef.current) {
+        portalLightRef.current.intensity = intensity * 15; // Building glow inside
+      }
+
+      if (progress >= 100 && tremorElapsed > 1.5 && phaseRef.current === 'tremor') {
+        phaseRef.current = 'snap';
+        phaseStartTime.current = elapsed;
+        onPhaseChange('snap');
+      }
+    }
+
+    // --- STAGE 6: Snap & Physics Break ---
+    if (currentPhase === 'snap') {
+      const snapElapsed = elapsed - phaseStartTime.current;
+      const t = Math.min(snapElapsed / 0.8, 1);
+      const easeOutBack = (x: number) => {
+        const c1 = 1.70158; const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+      };
+      
+      const offset = easeOutBack(t) * 1.5;
 
       if (leftRef.current) {
         leftRef.current.position.x = -offset;
-        leftRef.current.rotation.y -= delta * 0.2;
+        leftRef.current.rotation.y = -t * 0.5;
+        leftRef.current.rotation.z = t * 0.2;
       }
+      
       if (rightRef.current) {
         rightRef.current.position.x = offset;
-        rightRef.current.rotation.y += delta * 0.2;
+        rightRef.current.rotation.y = t * 0.5;
+        rightRef.current.rotation.z = -t * 0.2;
       }
 
-      if (groupRef.current) {
-        groupRef.current.rotation.y += delta * 0.15;
+      if (portalLightRef.current) {
+        portalLightRef.current.intensity = 20 + Math.sin(elapsed * 20) * 5; // Pulsing
       }
 
-      if (glowRef.current) {
-        const flash = breakT < 0.2 ? 6 * (1 - breakT / 0.2) : 0;
-        glowRef.current.intensity = flash;
-      }
-
-      if (particlesRef.current) {
-        const pos = particlesRef.current.geometry.attributes.position.array as Float32Array;
-        for (let i = 0; i < particleCount; i++) {
-          const v = particleVelocities[i];
-          pos[i * 3] += v.x * delta;
-          pos[i * 3 + 1] += (v.y - 2.5) * delta;
-          pos[i * 3 + 2] += v.z * delta;
-          v.x *= 0.96;
-          v.y *= 0.96;
-          v.z *= 0.96;
+      // Physics Crumbs
+      if (crumbsRef.current && snapElapsed > 0.05) {
+        const dummy = new THREE.Object3D();
+        for (let i = 0; i < crumbCount; i++) {
+          const p = crumbPhysics[i];
+          p.vel.y -= 15 * delta; // Gravity
+          p.pos.addScaledVector(p.vel, delta);
+          p.rot.addScaledVector(p.rotVel, delta);
+          
+          dummy.position.copy(p.pos);
+          dummy.rotation.setFromVector3(p.rot);
+          const s = p.scale * Math.max(0, 1 - snapElapsed * 0.5); // Shrink over time
+          dummy.scale.set(s, s, s);
+          dummy.updateMatrix();
+          crumbsRef.current.setMatrixAt(i, dummy.matrix);
         }
-        particlesRef.current.geometry.attributes.position.needsUpdate = true;
+        crumbsRef.current.instanceMatrix.needsUpdate = true;
       }
 
-      if (breakT >= 1 && phaseRef.current === 'break') {
-        phaseRef.current = 'fall';
-        fallStartRef.current = elapsed;
+      if (t >= 1 && phaseRef.current === 'snap') {
+        phaseRef.current = 'portal';
+        phaseStartTime.current = elapsed;
+        onPhaseChange('portal');
       }
     }
 
-    if (currentPhase === 'fall') {
-      const fallSpeed = delta * 5.5;
-      if (leftRef.current) {
-        leftRef.current.position.y -= fallSpeed;
-        leftRef.current.rotation.x += delta * 2;
-        leftRef.current.rotation.z += delta * 1.2;
-      }
-      if (rightRef.current) {
-        rightRef.current.position.y -= fallSpeed;
-        rightRef.current.rotation.x -= delta * 1.8;
-        rightRef.current.rotation.z += delta * 1;
+    // --- STAGE 7 & 8: Portal Camera Fly-through ---
+    if (currentPhase === 'portal') {
+      const portalElapsed = elapsed - phaseStartTime.current;
+      
+      // Move halves further away rapidly
+      if (leftRef.current) leftRef.current.position.x -= delta * 4;
+      if (rightRef.current) rightRef.current.position.x += delta * 4;
+
+      // Camera flies THROUGH the gap
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, -5, delta * 3);
+
+      if (portalLightRef.current) {
+        portalLightRef.current.intensity = THREE.MathUtils.lerp(portalLightRef.current.intensity, 100, delta * 5);
       }
 
-      if (particlesRef.current) {
-        const pos = particlesRef.current.geometry.attributes.position.array as Float32Array;
-        for (let i = 0; i < particleCount; i++) {
-          const v = particleVelocities[i];
-          pos[i * 3] += v.x * delta;
-          pos[i * 3 + 1] += (v.y - 4) * delta;
-          pos[i * 3 + 2] += v.z * delta;
-        }
-        particlesRef.current.geometry.attributes.position.needsUpdate = true;
-      }
-
-      const fallT = Math.min((elapsed - fallStartRef.current) / 0.8, 1);
-      if (fallT >= 1 && phaseRef.current === 'fall') {
+      if (portalElapsed > 1.2 && phaseRef.current === 'portal') {
         phaseRef.current = 'done';
-        onDone();
+        onPhaseChange('done');
       }
     }
   });
 
   return (
     <group ref={groupRef}>
-      <pointLight ref={glowRef} position={[0, 0, 0]} color="#fbbf24" distance={8} intensity={0} />
+      <pointLight ref={portalLightRef} position={[0, 0, 0]} color="#fbbf24" distance={15} intensity={0} />
 
-      {/* Realistic Lighting for the physical materials */}
-      <ambientLight intensity={0.3} color="#fff" />
-      <directionalLight position={[5, 5, 5]} intensity={2.5} color="#fff5e6" castShadow />
-      <directionalLight position={[-5, -2, -5]} intensity={0.8} color="#ffedd5" />
-      <pointLight position={[0, 3, 2]} intensity={1.5} color="#ffedd5" />
+      {/* Cinematic Lighting Setup */}
+      <ambientLight intensity={0.4} color="#fff" />
+      <directionalLight position={[5, 8, 5]} intensity={3.0} color="#fff5e6" castShadow shadow-bias={-0.001} />
+      <directionalLight position={[-8, -2, -8]} intensity={1.5} color="#fb923c" /> {/* Warm Rim */}
+      <pointLight position={[0, 4, 3]} intensity={2.0} color="#ffe4e1" />
 
       {/* Left half */}
       <group ref={leftRef}>
-        <mesh geometry={geoms.leftBody} castShadow receiveShadow>
-          <meshPhysicalMaterial
-            vertexColors
-            roughness={0.7}
-            metalness={0.05}
-            clearcoat={0.15}
-            clearcoatRoughness={0.8}
-            bumpMap={bumpTexture}
-            bumpScale={0.012}
-          />
-        </mesh>
-        <GrainPoints positions={leftGrainPos} texture={sugarTexture} />
+        <mesh geometry={geoms.leftBody} material={material} castShadow receiveShadow />
+        <SugarCrystals positions={leftGrains.positions} scales={leftGrains.scales} />
       </group>
 
       {/* Right half */}
       <group ref={rightRef}>
-        <mesh geometry={geoms.rightBody} castShadow receiveShadow>
-          <meshPhysicalMaterial
-            vertexColors
-            roughness={0.7}
-            metalness={0.05}
-            clearcoat={0.15}
-            clearcoatRoughness={0.8}
-            bumpMap={bumpTexture}
-            bumpScale={0.012}
-          />
-        </mesh>
-        <mesh geometry={geoms.dip} castShadow receiveShadow>
-          <meshPhysicalMaterial
-            color="#3d1f00"
-            roughness={0.15}
-            metalness={0.1}
-            clearcoat={1.0}
-            clearcoatRoughness={0.1}
-          />
-        </mesh>
-        <GrainPoints positions={rightGrainPos} texture={sugarTexture} />
+        <mesh geometry={geoms.rightBody} material={material} castShadow receiveShadow />
+        <SugarCrystals positions={rightGrains.positions} scales={rightGrains.scales} />
       </group>
 
-      {/* Break crumbs */}
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[particlePositions, 3]}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          size={0.1}
-          color="#f59e0b"
-          transparent
-          opacity={0.9}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          map={sugarTexture}
+      {/* Exploding Crumbs */}
+      <instancedMesh ref={crumbsRef} args={[crumbGeo, material, crumbCount]} castShadow>
+        <meshPhysicalMaterial 
+          color="#8b4513"
+          roughness={0.9} 
+          bumpMap={bumpMap} 
+          bumpScale={0.05} 
         />
-      </points>
+      </instancedMesh>
     </group>
   );
 }

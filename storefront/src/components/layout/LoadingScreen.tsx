@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useAnimate } from "framer-motion";
 import dynamic from "next/dynamic";
+import { LoaderPhase } from "@/components/3d/ChurroLoader";
 
 const LoadingCanvas = dynamic(() => import("@/components/3d/LoadingCanvas"), { ssr: false });
 
@@ -20,14 +21,6 @@ const STARS = Array.from({ length: 80 }, (_, i) => ({
   delay: (det(5, i * 3 + 4) * 3).toFixed(2),
 }));
 
-const CRUMBS = Array.from({ length: 28 }, (_, i) => ({
-  angle: (det(6, i * 2) * 360).toFixed(1),
-  dist: (det(7, i * 2 + 1) * 220 + 80).toFixed(1),
-  size: (det(8, i * 2) * 10 + 4).toFixed(1),
-  dur: (det(9, i * 2 + 1) * 0.6 + 0.5).toFixed(2),
-  color: i % 4 === 0 ? "#f97316" : i % 4 === 1 ? "#fbbf24" : i % 4 === 2 ? "#c8803a" : "#fde68a",
-}));
-
 const MESSAGES = [
   "Fueling the Churro Engine…",
   "Navigating the Caramel Nebula…",
@@ -36,23 +29,18 @@ const MESSAGES = [
   "Launching Churroverse…",
 ];
 
-/* ─── phases ───────────────────────────────────────────────────── */
-type Phase = "drop" | "float" | "crack" | "shatter" | "reveal" | "done";
-
 export default function LoadingScreen({ onComplete }: { onComplete: () => void }) {
-  const [phase, setPhase] = useState<Phase>("drop");
+  const [phase, setPhase] = useState<LoaderPhase>("descend");
   const [progress, setProgress] = useState(0);
   const [msgIdx, setMsgIdx] = useState(0);
-  const [showCrumbs, setShowCrumbs] = useState(false);
-  const [showRing, setShowRing] = useState(false);
   const [scope, animate] = useAnimate();
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* progress ticker */
   useEffect(() => {
     const iv = setInterval(() => {
       setProgress(p => {
-        const next = Math.min(p + Math.random() * 6 + 2, 100);
+        // Slow down near 100 to let the cinematic play out
+        const next = Math.min(p + (p > 80 ? 0.5 : Math.random() * 4 + 1), 100);
         setMsgIdx(Math.min(Math.floor((next / 100) * MESSAGES.length), MESSAGES.length - 1));
         if (next >= 100) clearInterval(iv);
         return next;
@@ -61,31 +49,12 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     return () => clearInterval(iv);
   }, []);
 
-  /* phase sequencer: progress 100 → crack → shatter → reveal */
-  useEffect(() => {
-    if (progress >= 100 && phase === "float") {
-      setPhase("crack");
-      timerRef.current = setTimeout(() => {
-        setShowCrumbs(true);
-        setShowRing(true);
-        setPhase("shatter");
-        timerRef.current = setTimeout(() => {
-          setPhase("reveal");
-          timerRef.current = setTimeout(() => {
-            setPhase("done");
-            onComplete();
-          }, 900);
-        }, 1000);
-      }, 700);
+  const handlePhaseChange = (newPhase: LoaderPhase) => {
+    setPhase(newPhase);
+    if (newPhase === 'done') {
+      onComplete();
     }
-  }, [progress, phase, onComplete]);
-
-  /* transition drop → float */
-  const handleDropEnd = () => {
-    if (phase === "drop") setPhase("float");
   };
-
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   const isDone = phase === "done";
 
@@ -125,91 +94,21 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
           </div>
 
           {/* ── Churro Wrapper ───────────────────────────── */}
-          <div className="relative flex items-center justify-center" style={{ width: 340, height: 340 }}>
-
-            {/* Orbit decoration rings */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{ border: "1px dashed rgba(234,88,12,0.2)" }}
-            />
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              className="absolute rounded-full pointer-events-none"
-              style={{ inset: 20, border: "1px dashed rgba(251,191,36,0.12)" }}
-            />
-
+          <div className="relative flex items-center justify-center" style={{ width: "100vw", height: "100vh" }}>
+            
             {/* ── 3D Churro Canvas ───────────────────────────── */}
             <div className="absolute inset-0 z-10" style={{ filter: "drop-shadow(0 10px 30px rgba(234,88,12,0.3))" }}>
               <LoadingCanvas
                 progress={progress}
-                onBreakStart={() => setShowRing(true)}
-                onDone={() => {
-                  setPhase("reveal");
-                  timerRef.current = setTimeout(() => {
-                    setPhase("done");
-                    onComplete();
-                  }, 900);
-                }}
+                onPhaseChange={handlePhaseChange}
               />
             </div>
 
-            {/* ── Shockwave ring ─────────────────────────── */}
-            <AnimatePresence>
-              {showRing && phase !== "reveal" && (
-                <motion.div
-                  key="ring"
-                  initial={{ scale: 0.2, opacity: 1 }}
-                  animate={{ scale: 4.5, opacity: 0 }}
-                  transition={{ duration: 0.9, ease: "easeOut" }}
-                  className="absolute rounded-full pointer-events-none"
-                  style={{
-                    width: 100,
-                    height: 100,
-                    border: "3px solid rgba(251,191,36,0.9)",
-                    boxShadow: "0 0 40px rgba(234,88,12,0.6)",
-                    zIndex: 30,
-                  }}
-                />
-              )}
-            </AnimatePresence>
-
-            {/* ── Crumb particles ────────────────────────── */}
-            <AnimatePresence>
-              {showCrumbs && phase === "shatter" && (
-                <>
-                  {CRUMBS.map((c, i) => {
-                    const rad = (Number(c.angle) * Math.PI) / 180;
-                    const tx = Math.cos(rad) * Number(c.dist);
-                    const ty = Math.sin(rad) * Number(c.dist);
-                    return (
-                      <motion.div
-                        key={i}
-                        initial={{ x: 0, y: 0, scale: 1, opacity: 1 }}
-                        animate={{ x: tx, y: ty, scale: 0, opacity: 0 }}
-                        transition={{ duration: Number(c.dur), ease: "easeOut", delay: i * 0.01 }}
-                        className="absolute rounded-full pointer-events-none"
-                        style={{
-                          width: `${c.size}px`,
-                          height: `${c.size}px`,
-                          background: c.color,
-                          boxShadow: `0 0 ${Number(c.size) * 1.5}px ${c.color}`,
-                          zIndex: 25,
-                        }}
-                      />
-                    );
-                  })}
-                </>
-              )}
-            </AnimatePresence>
-
             {/* ── Floating sparkle dots ──────────────────── */}
-            {(phase === "float" || phase === "crack") && [0, 1, 2, 3].map(i => (
+            {(phase === "macro" || phase === "tremor") && [0, 1, 2, 3].map(i => (
               <motion.div
                 key={`spark-${i}`}
-                className="absolute rounded-full pointer-events-none"
+                className="absolute rounded-full pointer-events-none z-20"
                 style={{
                   width: 5, height: 5,
                   background: i % 2 === 0 ? "#fbbf24" : "#f97316",
@@ -224,14 +123,14 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
 
           {/* ── Brand + progress ──────────────────────────── */}
           <AnimatePresence>
-            {(phase === "drop" || phase === "float" || phase === "crack") && (
+            {(phase === "descend" || phase === "macro" || phase === "tremor") && (
               <motion.div
                 key="brand"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20, scale: 0.9 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="relative z-10 flex flex-col items-center gap-5 mt-10"
+                className="absolute bottom-10 z-10 flex flex-col items-center gap-5 pointer-events-none"
               >
                 {/* Logo */}
                 <div className="text-center">
@@ -296,47 +195,15 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
 
           {/* ── Full-screen flash on shatter ──────────────── */}
           <AnimatePresence>
-            {phase === "shatter" && (
+            {phase === "snap" && (
               <motion.div
                 key="flash"
-                initial={{ opacity: 0.7 }}
+                initial={{ opacity: 0.8 }}
                 animate={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.6 }}
                 className="absolute inset-0 pointer-events-none z-[50]"
                 style={{ background: "radial-gradient(circle, rgba(251,191,36,0.6) 0%, transparent 70%)" }}
               />
-            )}
-          </AnimatePresence>
-
-          {/* ── Curtain reveal wipe ────────────────────────── */}
-          <AnimatePresence>
-            {phase === "reveal" && (
-              <>
-                {/* Top curtain flying up */}
-                <motion.div
-                  key="curtain-top"
-                  initial={{ y: 0 }}
-                  animate={{ y: "-100%" }}
-                  transition={{ duration: 0.75, ease: [0.76, 0, 0.24, 1] }}
-                  className="absolute top-0 left-0 w-full z-[60]"
-                  style={{
-                    height: "50vh",
-                    background: "linear-gradient(180deg, #020010 70%, rgba(2,0,16,0))",
-                  }}
-                />
-                {/* Bottom curtain flying down */}
-                <motion.div
-                  key="curtain-bot"
-                  initial={{ y: 0 }}
-                  animate={{ y: "100%" }}
-                  transition={{ duration: 0.75, ease: [0.76, 0, 0.24, 1] }}
-                  className="absolute bottom-0 left-0 w-full z-[60]"
-                  style={{
-                    height: "50vh",
-                    background: "linear-gradient(0deg, #020010 70%, rgba(2,0,16,0))",
-                  }}
-                />
-              </>
             )}
           </AnimatePresence>
         </motion.div>
