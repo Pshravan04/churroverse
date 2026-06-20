@@ -602,8 +602,15 @@ function BestsellersSection({ products }: { products: Product[] }) {
           variants={stagger}
         >
           <SectionHeader subtitle="— Mission-Critical Picks —" title="Best Sellers" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {products.slice(0, 4).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+          <div className="flex flex-col gap-4">
+            {products.slice(0, 4).map((p, i) => (
+              <CompactFeaturedCard
+                key={p.id}
+                product={p}
+                index={i}
+                accent={CARD_ACCENTS[i % CARD_ACCENTS.length]}
+              />
+            ))}
           </div>
           <motion.div variants={fadeUp} className="text-center mt-10">
             <Link href="/products?sort=rating">
