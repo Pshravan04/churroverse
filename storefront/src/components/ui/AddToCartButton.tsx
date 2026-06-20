@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Check, Loader2 } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuth } from "@clerk/nextjs";
+import { createPortal } from "react-dom";
 import type { Product } from "@/lib/types";
 
 interface AddToCartButtonProps {
@@ -25,6 +26,22 @@ export default function AddToCartButton({
   const { userId } = useAuth();
   const addItem = useCartStore((s) => s.addItem);
   const [state, setState] = useState<"idle" | "loading" | "success">("idle");
+  const [rockets, setRockets] = useState<{ id: number; startX: number; startY: number }[]>([]);
+  const [cartPos, setCartPos] = useState<{ x: number; y: number } | null>(null);
+
+  // Get cart icon position periodically or on mount/resize
+  useEffect(() => {
+    const updateCartPos = () => {
+      const cartIcon = document.getElementById("nav-cart-icon");
+      if (cartIcon) {
+        const rect = cartIcon.getBoundingClientRect();
+        setCartPos({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+      }
+    };
+    updateCartPos();
+    window.addEventListener("resize", updateCartPos);
+    return () => window.removeEventListener("resize", updateCartPos);
+  }, []);
 
   const sizeClasses = {
     sm: "text-xs px-3 py-2",
@@ -32,8 +49,22 @@ export default function AddToCartButton({
     lg: "text-lg px-8 py-4",
   };
 
-  async function handleClick() {
+  async function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (state !== "idle") return;
+    
+    if (cartPos) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const newRocket = {
+        id: Date.now(),
+        startX: rect.left + rect.width / 2,
+        startY: rect.top + rect.height / 2,
+      };
+      setRockets(prev => [...prev, newRocket]);
+      setTimeout(() => {
+        setRockets(prev => prev.filter(r => r.id !== newRocket.id));
+      }, 1000);
+    }
+    
     setState("loading");
     try {
       await addItem(product, quantity, userId);
@@ -110,6 +141,31 @@ export default function AddToCartButton({
           ? "Added! 🚀"
           : "Add to Cart"}
       </motion.span>
+      
+      {/* Rocket Animation Portal */}
+      {typeof window !== "undefined" && createPortal(
+        <AnimatePresence>
+          {rockets.map(rocket => (
+            <motion.div
+              key={rocket.id}
+              initial={{ x: rocket.startX, y: rocket.startY, scale: 0.5, opacity: 0, rotate: -45 }}
+              animate={{ 
+                x: [rocket.startX, rocket.startX + (cartPos?.x && rocket.startX > cartPos.x ? -50 : 50), cartPos?.x || 0], 
+                y: [rocket.startY, rocket.startY - 150, cartPos?.y || 0],
+                scale: [0.5, 1.5, 0.2],
+                opacity: [0, 1, 0],
+                rotate: [-45, 0, 45]
+              }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              className="fixed z-[9999] text-4xl pointer-events-none drop-shadow-[0_0_20px_rgba(234,88,12,0.8)]"
+              style={{ marginLeft: -16, marginTop: -16 }}
+            >
+              🚀
+            </motion.div>
+          ))}
+        </AnimatePresence>,
+        document.body
+      )}
     </button>
   );
 }

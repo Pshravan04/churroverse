@@ -78,8 +78,8 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <HeaderAuth />
 
-            {/* Cart trigger — opens drawer */}
             <Button
+              id="nav-cart-icon"
               size="icon"
               variant="ghost"
               onClick={() => setCartOpen(true)}
