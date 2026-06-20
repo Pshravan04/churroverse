@@ -2,7 +2,6 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Preload } from "@react-three/drei";
-import PlaceholderChurroPlanet from "./PlaceholderChurroPlanet";
 import StarField from "./StarField";
 import UFOFleet from "./UFOFleet";
 import { CosmicParticles } from "./CosmicParticles";
@@ -27,7 +26,6 @@ export default function GlobalCanvas({ children }: { children?: React.ReactNode 
         {/* Scene elements */}
         <StarField count={3000} />
         <CosmicParticles count={2000} />
-        <PlaceholderChurroPlanet position={[2.5, -0.5, -5]} scale={1.5} />
         <UFOFleet />
         
         {children}
