@@ -8,11 +8,16 @@ export async function GET(request: Request) {
     const category = url.searchParams.get('category') ?? 'all';
     const search = url.searchParams.get('search') ?? undefined;
     const sort = url.searchParams.get('sort') ?? 'featured';
+    const featured = url.searchParams.get('featured');
 
     let query = supabase.from('products').select('*');
 
     if (category && category !== 'all') {
       query = query.eq('category', category);
+    }
+
+    if (featured === 'true') {
+      query = query.eq('featured', true);
     }
 
     if (search) {
