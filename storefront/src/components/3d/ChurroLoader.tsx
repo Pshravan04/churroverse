@@ -15,8 +15,8 @@ const INNER_R = 0.26;
 type Phase = 'enter' | 'float' | 'break' | 'fall' | 'done';
 
 /* ── Realistic Bump Map for Fried Dough ── */
-function makeDoughBumpTexture(): THREE.CanvasTexture {
-  if (typeof document === 'undefined') return new THREE.CanvasTexture(document.createElement('canvas'));
+function makeDoughBumpTexture(): THREE.Texture {
+  if (typeof document === 'undefined') return new THREE.Texture();
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 512;
@@ -39,8 +39,8 @@ function makeDoughBumpTexture(): THREE.CanvasTexture {
 }
 
 /* ── Realistic Sugar Crystals ── */
-function makeSugarTexture(): THREE.CanvasTexture {
-  if (typeof document === 'undefined') return new THREE.CanvasTexture(document.createElement('canvas'));
+function makeSugarTexture(): THREE.Texture {
+  if (typeof document === 'undefined') return new THREE.Texture();
   const canvas = document.createElement('canvas');
   canvas.width = 32;
   canvas.height = 32;
