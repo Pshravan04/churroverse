@@ -249,7 +249,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
 
             {/* ── Shockwave ring ─────────────────────────── */}
             <AnimatePresence>
-              {showRing && phase !== "reveal" && phase !== "done" && (
+              {showRing && phase !== "reveal" && (
                 <motion.div
                   key="ring"
                   initial={{ scale: 0.2, opacity: 1 }}
