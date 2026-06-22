@@ -30,7 +30,15 @@ export default function LoginPage() {
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
         <div className="relative z-10 flex flex-col items-center">
-          <h1 className="text-3xl font-bold mb-6 text-center text-white">Space Station Portal</h1>
+          <h1 className="text-3xl font-bold mb-2 text-center text-white">Space Station Portal</h1>
+          <p className="text-gray-500 text-sm text-center mb-6">
+            Sign in to access your mission dashboard
+          </p>
+          <div className="w-full text-center mb-4">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-gray-600 bg-white/[0.03] border border-white/5 rounded-full px-3 py-1">
+              🔐 Admin: <span className="text-orange-400/70">admin@churroverse.com</span>
+            </span>
+          </div>
           <SignIn 
             appearance={{
               elements: {
