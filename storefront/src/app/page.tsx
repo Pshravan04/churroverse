@@ -964,6 +964,8 @@ function FooterSection() {
 }
 
 // ── Page ──────────────────────────────────────────────────────
+const BUTest: number = "this will break the build";
+
 export default function Home() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
